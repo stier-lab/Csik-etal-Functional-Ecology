@@ -1,0 +1,162 @@
+---
+title: "Calculte Resting Heart Rate"
+author: "Sam Csik"
+date: "2/19/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+Calculate resting heart rate (f~H~) for each lobster as the 15th percentile of each lobster's heart rate measurements.
+ 
+We also examine the relationship between lobster resting heart rate and temperature by fitting linear and quadratic models to the data and using AIC to determine the best fit model.
+
+###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Calculate resting heart rate for each lobster
+**Part 2** Calculate treatment-level summary stats (will eventually be used for plotting)
+**Part 3** (TABLE S8 GENERATED HERE) Compare linear and quadratic model fits to resting heart rate data
+
+###**Packages Required:** 
+
+    - tidyverse
+    - here
+    - sjPlot
+    
+###**Data Required:**
+    
+**(file path: data/heart_rate/outputs)**
+
+    - processed_heart_rates.csv
+
+####**Part 0.** Import libraries and data
+```{r}
+##############################
+# load required packages
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+all_hr <- read_csv(here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv")) %>% 
+  select(date2, lobster_id, temperature, hr, QI) 
+```
+
+####**Part 1.** Calculate resting heart rate as the 15th percentile of each lobster's heart rate measurements (keeping consistent with SMR analyses)
+```{r}
+##############################
+# 21C
+##############################
+
+L3 <- all_hr %>% filter(lobster_id == "L3")
+L3q <- quantile(L3$hr, c(0.15)) # 61 
+
+L4 <- all_hr %>% filter(lobster_id == "L4")
+L4q <- quantile(L4$hr, c(0.15)) # 120
+
+N14 <- all_hr %>% filter(lobster_id == "N14")
+N14q <- quantile(N14$hr, c(0.15)) # 90
+
+##############################
+# 16C
+##############################
+
+GP05 <- all_hr %>% filter(lobster_id == "GP05") 
+GP05q <- quantile(GP05$hr, c(0.15)) # 71
+
+GP06 <- all_hr %>% filter(lobster_id == "GP06") 
+GP06q <- quantile(GP06$hr, c(0.15)) # 75
+
+IV17 <- all_hr %>% filter(lobster_id == "IV17") 
+IV17q <- quantile(IV17$hr, c(0.15)) # 85
+
+##############################
+# 11C
+##############################
+
+IV11 <- all_hr %>% filter(lobster_id == "IV11") 
+IV11q <- quantile(IV11$hr, c(0.15)) # 34
+
+IV13 <- all_hr %>% filter(lobster_id == "IV13") 
+IV13q <- quantile(IV13$hr, c(0.15)) # 41
+
+IV14 <- all_hr %>% filter(lobster_id == "IV14") 
+IV14q <- quantile(IV14$hr, c(0.15)) # 19.65
+
+##############################
+# make into df
+##############################
+
+resting_heart_rates <- data.frame("lob_id" = c("L3", "L4", "N14", "GP05", "GP06", "IV17", "IV11", "IV13", "IV14"),
+                                  "temp" = c("21", "21", "21", "16", "16", "16", "11", "11", "11"),
+                                  "rhr" = c(L3q, L4q, N14q, GP05q, GP06q, IV17q, IV11q, IV13q, IV14q))
+
+# write.csv(resting_heart_rates, here::here("data", "heart_rate", "outputs", "resting_heart_rates.csv"), row.names = FALSE)
+```
+
+#####**Part 2.** Calculate summary stats (treatment-level)
+```{r}
+hr_summary <- resting_heart_rates %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    hr_avg = mean(rhr),
+    hr_sd = sd(rhr),
+    hr_se = hr_sd/sqrt(length(rhr)),
+    hr_cv = hr_sd/hr_avg,
+    hr_max = max(rhr),
+    hr_min = min(rhr),
+    error = qnorm(0.975) * sd(rhr)/sqrt(length(rhr)),
+    upper_95ci = hr_avg + error,
+    lower_95ci = hr_avg - error
+    )
+
+# write.csv(hr_summary, here::here("data", "heart_rate", "outputs", "rhr_summary_stats.csv"), row.names = FALSE)
+```
+
+####**Part 3.** Fit linear and quadratic models to *resting heart rate* data; create table for supplement
+```{r}
+##############################
+# fit models
+##############################
+
+resting_heart_rates_numerictemps <- resting_heart_rates %>% mutate(temp = as.numeric(as.character(temp)))
+
+##############################
+# fit models
+##############################
+
+# linear model
+hr_lm_mod <- lm(formula = rhr ~ temp, data = resting_heart_rates_numerictemps)
+summary(hr_lm_mod)
+
+# quadratic model
+temp2 <- resting_heart_rates_numerictemps$temp^2 # temp squared
+hr_quadratic_mod <- lm(rhr ~ temp + temp2, data = resting_heart_rates_numerictemps)
+summary(hr_quadratic_mod)
+
+##############################
+# create table (manually edit aesthetics in Word)
+##############################
+
+tab_model(hr_lm_mod, hr_quadratic_mod,
+          dv.labels = c("Linear Model", "Quadratic Model"),
+          pred.labels = c(`(Intercept)` = "Intercept",
+                          temp = "Temperature (°C)",
+                          temp2 = "Temperature (°C)^2"),
+          string.pred = "Coefficient",
+          string.est = "Estimate",
+          show.se = TRUE,
+          string.se = "SE",
+          string.ci = "95% CI",
+          show.aic = TRUE)
+```
