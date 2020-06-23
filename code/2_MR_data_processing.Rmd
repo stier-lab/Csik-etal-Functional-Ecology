@@ -1,0 +1,191 @@
+---
+title: "Respirometry Data Processing"
+author: "Sam Csik"
+date: "6/23/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary** 
+
+We used intermittent-flow respirometry to quantify temperature effects on key metabolic traits (SMR, MMR, AS). Some useful definitions:
+
+1. *Standard Metabolic Rate (SMR):* minimum maintenence metabolism in a unstressed, post-absortive, non-reproductive ectotherm acclimated to a specific temperature, representing the basic cost of survival
+
+2. *Maximum Metabolic Rate (MMR):* the upper boundary for aerobic energy metabolism
+
+3. *Absolute Aerobic Scope (AAS):* MMR-SMR, i.e. the absoute increase in oxygen consumption that an individual can achieve above baseline levels
+
+4. *Factorial Aerobic Scope (FAS):* MMR/SMR, i.e the proportional increase in oxygen consumption that an individual can achieve above baseline levels
+
+Respirometry data was analyzed with proprietary software written by co-author Krista Kraskura. This software is in development for publication as an R package and, as such, is not yet published here. When appropriate, I will update this repo with the respriometry data processing pipeline.
+
+Data currently available include SMR, MMR, AAS, and FAS calculated for each lobster.
+
+MMRs were calculated as the fasted rate of linear O~2~ decline over a 60s interval.
+
+SMRs were calculated using three different methods (calculations using each of these methods are available in the `all_mr.csv` data file, though calculations using the q~15~ method are used in subsequent analyses):
+
+The **low 10** method first discards teh 5 absolute lowest values as outliers, then calculates SMR as the mean of the lowest 10 of values remaining. Because I have visually assessed my data (slopes of O~2~ deline) for quality and ensured that usable data (a) exhibited linear declines in mg O~2~ L^-1^ min^-1^ (b) with an R^2^ greater than 0.85, and (c) had at least 2 min of continuous data, I am confident that the data used in analyses are representative of the true SMR for each individual lobster. To discard the 5 absolute lowest values in addition to this rigorous cleaning protocol would be redundant and likely result in discarding true SMR values.
+
+The **q~10~** method assigns 10% of the data below SMR and assumes that when an animal has reached a state corresponding to SMR, the MO~2~ values vary around the true SMR, with half of them above and half of them below. Using this method, we find that there may be as little as *4* values falling below the 10^th^ percentile and that most of these values correspond to those that were automatically discarded in the low10 method. This method then may be underestimating SMR.
+
+The **q~15~** method works in the same way at q~10~, but assigns 15% of the data below SMR. Using this method ensures that at least *6* values are accounted for as falling below the 15^th^ percentile. Further, when you compare these values to those from the low10 method, we see that about half of them were measurements that would have been discarded, and half were those that were kept. Because this q~15~ method (1) accounts for more values (at least 6) than the q~10~ method and (2) does not discard data points that may actually be representative of SMR as in the low10 method, I believe that this method is justifiable.
+
+For reference, [Chabot et al. 2016](https://onlinelibrary.wiley.com/doi/pdf/10.1111/jfb.12845) provides an overview of the methods considered here. [Dupont-Prinet et al. 2013](https://www.researchgate.net/profile/Marie_Vagner/publication/236211133_Impact_of_hypoxia_in_the_St_Lawrence_Estuary_on_the_metabolism_of_Greenland_halibut_Reinhardtius_hippoglossoides/links/00b4951b9e6b86aac4000000.pdf) justifies using the q~15~ method in their study of oxygen consumption of the Northern shrimp (*Pandalus borealis*) under hypoxic conditions.
+
+For more a more detailed description of our respirometry data analysis, see *Estimating lobster metabolic rates* in the Methods section of the manuscript.
+
+###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Ensure that there is no metabolic scaling with lobster body size
+**Part 2** Calculate treatment-level summary stats (will eventually be used for plotting)
+
+###**Packages Required:** 
+
+    - tidyverse
+    - here
+    
+###**Data Required:**
+    
+**(file path: data/metabolism)**
+
+    - metabolic_traits.csv
+
+####**Part 0** Import packages and data
+```{r}
+##############################
+# import libraries
+##############################
+
+source("code/libraries.R")
+
+##############################
+# load data
+##############################
+
+metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv"))
+```
+
+####**Part 1** Ensure that metabolism does not scale with body size (we selected individuals of similar sizes and therefore should not see strong body size scaling effects) by visually assessing the plot below (should see a cloud of points, rather than any clear trends):
+```{r}
+##############################
+# calculate SMR without body mass (units = mg O2 min^-1) by multiplying BM * SMR_low15quant
+##############################
+
+mr_no_mass <- metabolic_rates %>% 
+  mutate(SMR = BW * SMR_low15quant,
+         MMR = BW * mmr_overall,
+         AS = BW * AS_SMR_low15quant) %>% 
+  select(ID, temp, BW, SMR, MMR, AS) %>% 
+  gather(SMR, MMR, AS, key = trait, value = mr_no_mass) %>% 
+  mutate(trait = fct_relevel(trait, "SMR", "MMR", "AS"),
+         temp = fct_relevel(as.factor(temp), "11", "16", "21", "26"))
+
+##############################
+# plot mr_no_mass ~ BW
+##############################
+
+mr_nomass_plot <- ggplot(mr_no_mass, aes(x = BW, y = mr_no_mass)) +
+  geom_point(aes(color = temp)) +
+  facet_wrap(~trait, scales = "free") +
+  xlab("Body Mass (kg)") +
+  ylab(expression("MO2" ~ "(mg" ~ O[2] ~ min^{-1} ~ ")")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fil = NA, size = 0.7),
+        strip.background = element_rect(fill = "white"),
+        strip.text = element_text(size = 12),
+        legend.position = "none") +
+  scale_color_manual(values = c("lightblue", "lightslategray", "lightcoral", "indianred4"))
+```
+
+####**Part 2** Calulate summary stats (treatment-level)
+```{r}
+##############################
+# SMR
+##############################
+
+SMR_summary <- metabolic_rates %>%
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarise(
+    SMR_avg = round(mean(SMR_low15quant, na.rm = T),3),
+    SMR_sd = round(sd(SMR_low15quant, na.rm = T),3),
+    SMR_se = round(SMR_sd/sqrt(length(SMR_low15quant)),3),
+    SMR_cv = SMR_sd/SMR_avg,
+    SMR_min = round(min(SMR_low15quant),3),
+    SMR_max = round(max(SMR_low15quant),3),
+    error = qnorm(0.975) * sd(SMR_low15quant)/sqrt(length(SMR_low15quant)),
+    upper_95ci = SMR_avg + error,
+    lower_95ci = SMR_avg - error)
+
+# write.csv(SMR_summary, here::here("data", "metabolism", "outputs", "smr_summary_stats.csv"), row.names = FALSE)
+
+##############################
+# MMR
+##############################
+
+MMR_summary <- metabolic_rates %>%
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    MMR_avg = round(mean(mmr_overall, na.rm = T), 3),
+    MMR_sd = round(sd(mmr_overall, na.rm = T),3),
+    MMR_se = round(MMR_sd/sqrt(length(mmr_overall)),3),
+    MMR_cv =  MMR_sd/MMR_avg,
+    MMR_min = round(min(mmr_overall),3),
+    MMR_max = round(max(mmr_overall),3),
+    error = qnorm(0.975) * sd(mmr_overall)/sqrt(length(mmr_overall)),
+    upper_95ci = MMR_avg + error,
+    lower_95ci = MMR_avg - error)
+
+# write.csv(MMR_summary, here::here("data", "metabolism", "outputs", "mmr_summary_stats.csv"), row.names = FALSE)
+
+##############################
+# AAS
+##############################
+
+AAS_summary <- metabolic_rates %>%
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    AS_avg = round(mean(AS_SMR_low15quant, na.rm = T),3),
+    AS_sd = round(sd(AS_SMR_low15quant, na.rm = T),3),
+    AS_se = round(AS_sd/sqrt(length(AS_SMR_low15quant)),3),
+    AS_cv = AS_sd/AS_avg,
+    AS_min = round(min(AS_SMR_low15quant),3),
+    AS_max = round(max(AS_SMR_low15quant),3),
+    error = qnorm(0.975) * sd(AS_SMR_low15quant)/sqrt(length(AS_SMR_low15quant)), 
+    upper_95ci = AS_avg + error,
+    lower_95ci = AS_avg - error)
+
+# write.csv(AAS_summary, here::here("data", "metabolism", "outputs", "aas_summary_stats.csv"), row.names = FALSE)
+
+##############################
+# FAS
+##############################
+
+FAS_summary <- metabolic_rates %>%
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    FAS_avg = round(mean(FAS_q15, na.rm = T), 3),
+    FAS_sd = round(sd(FAS_q15, na.rm = T), 3),
+    FAS_se = FAS_sd/sqrt(length(FAS_q15)),
+    FAS_cv = FAS_sd/FAS_avg,
+    FAS_min = min(FAS_q15),
+    FAS_max = max(FAS_q15),
+    error = qnorm(0.975) * sd(FAS_q15)/sqrt(length(FAS_q15)),
+    upper_95ci = FAS_avg + error,
+    lower_95ci = FAS_avg - error)
+
+# write.csv(FAS_summary, here::here("data", "metabolism", "outputs", "fas_summary_stats.csv"), row.names = FALSE)
+```
