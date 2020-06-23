@@ -1,0 +1,277 @@
+---
+title: "LTER_temps"
+author: "Sam Csik"
+date: "10/9/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+LTER bottom temperature data are provided by the Santa Barbara Coastal LTER and can be downloaded from the [SBC LTER: Ongoing time-series of moored instruments](http://sbc.lternet.edu/cgi-bin/showCollections.cgi?stage=by_habitat&habitat=nearshore&submit=submit). Data used here were last updated Dec 2017. 
+
+These data were used to identify temperature treatments that would be representative of the max (21C), mean (16C), and min (11C) bottom temperatures experienced in the Santa Barbara Channel. Specifically, we look at Mohawk Reef (MKO). 
+
+###**Outline**
+
+**Part 1** Import packages and metadata
+**Part 2** Plot bottom temperature timeseries for all available LTER sites to identify missing data
+**Part 3** (FIGURE 1 GENERATED HERE); Select years with continuous bottom temperature data and create density ridges plot for MKO 
+**Part 4** (FOR REFERENCE ONLY; DOES NOT APPEAR IN MANUSCRIPT); Density ridge plots for 5 coastal LTER sites
+
+###**Packages Required:** 
+
+    - tidyverse
+    - here
+    - chron
+    - lubridate
+    - ggridges
+    
+###**Data Required:** 
+
+**(file path: data/LTER_temps/raw)**
+
+    - alegria_mooring_ale_20171208.csv
+    - arroyoquemado_mooring_arq_20171218.csv
+    - carpinteria_mooring_car_20171218.csv
+    - mohawk_mooring_mko_20171218.txt
+    - naples_mooring_nap_20171218.csv
+    
+**(file path: data/metadata)**
+
+    - metadata_lter_temps.csv
+
+####**Part 0.** Import packages and metadta
+```{r}
+##############################
+# import packages
+##############################
+
+source("code/0_libraries.R")
+
+##############################
+# metadata
+##############################
+
+lter_metadata <- read_csv(here::here("data", "metadata", "metadata_lter_temps.csv"))
+```
+
+####**Part 1.** Import and wrangle LTER temperature data for all available sites
+```{r}
+##############################
+# function to import LTER temps
+##############################
+
+import_temp_files <- function(file_name_csv, site){
+  read_csv(here::here("data/LTER_temps/raw", file_name_csv), col_names = TRUE, col_types = cols(.default = col_character())) %>% 
+  select(year, month, day, decimal_time, Temp_bot, Temp_top, Temp_mid) %>% 
+  unite(date, year, month, day, sep = "-", remove = FALSE) %>% 
+  mutate(time = times(as.numeric(decimal_time))) %>% 
+  unite(date_time, date, time, sep = " ") %>% 
+  select(date_time, year, month, day, Temp_bot, Temp_top, Temp_mid) %>% 
+  mutate(date_time = as.POSIXct(date_time, "%Y-%m-%d %H:%M:%S", tz = "GMT"),
+         year = as.factor(year),
+         month = as.factor(month),
+         day = as.numeric(day),
+         Temp_top = as.numeric(Temp_top), 
+         Temp_mid = as.numeric(Temp_mid), 
+         Temp_bot = as.numeric(Temp_bot),
+         site = rep(site)) %>% 
+  replace_with_na(replace = list(Temp_bot = 9999)) %>% 
+  replace_with_na(replace = list(Temp_top = 9999)) %>% 
+  replace_with_na(replace = list(Temp_mid = 9999))
+}
+
+##############################
+# initialize empty df
+##############################
+
+temp_data <- data.frame(date_time = as.Date(character()),
+                        year = factor(),
+                        month = factor(),
+                        day = numeric(),
+                        site = as.character(),
+                        Temp_bot = numeric(), # only plot this
+                        Temp_top = numeric(), # can comment out if not needed
+                        Temp_mid = numeric()) # can comment out if not needed
+
+##############################
+# read in/wrangle all files
+##############################
+
+for (row in 1:nrow(lter_metadata)) {
+  data_row <- lter_metadata[row,]
+  file_name_csv <- as.character(data_row[, 2]) 
+  print(file_name_csv)
+  site <- as.character(data_row[,3])
+  print(site)
+  table <- import_temp_files(file_name_csv, site) 
+  temp_data <- rbind(temp_data, table)
+}
+
+# write.csv(temp_data, here::here("data", "LTER_temps", "outputs", "all_bottom_temps_2005_2017.csv"), row.names = FALSE)
+```
+
+####**Part 2.** Plot temperature timeseries for each site. Add lines to mark my temperature treatements.
+```{r}
+##############################
+# plot all bottom temp lines on same fig
+##############################
+
+ggplot(temp_data, aes(x = date_time, y = Temp_bot)) +
+  geom_line() +
+  geom_hline(yintercept = 11, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 16, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 21, linetype = "dashed", color = "red") +
+  facet_wrap(~site, ncol = 1) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        plot.title = element_text(size = 20, face = "bold"),
+        panel.border = element_rect(colour = "black", fil = NA, size = 0.7),
+        strip.background = element_rect(fill = "white"),
+        strip.text = element_text(size = 12),
+        legend.position = "none") 
+```
+
+####**Part 3.** Wrangle MKO data and plot data density ridges 
+```{r}
+##############################
+# filter out MKO and years that don't have data for some sites; add month abbreviations; set factor levels
+##############################
+
+MKO_temp_data <- temp_data %>% 
+  filter(site == "MKO") %>%
+  filter(!year %in% c("1999", "2000", "2001", "2002", "2003", "2004")) %>% 
+  mutate(month = as.factor(month),
+         month_name = case_when(
+            month == "1" ~ "Jan",
+            month == "2" ~ "Feb",
+            month == "3" ~ "Mar",
+            month == "4" ~ "Apr",
+            month == "5" ~ "May",
+            month == "6" ~ "Jun",
+            month == "7" ~ "Jul",
+            month == "8" ~ "Aug",
+            month == "9" ~ "Sep",
+            month == "10" ~ "Oct",
+            month == "11" ~ "Nov",
+            month == "12" ~ "Dec"
+        )
+      ) %>% 
+  mutate(month_name = fct_relevel(month_name, "Dec", "Nov", "Oct", "Sep", "Aug", 
+                                  "Jul", "Jun", "May", "Apr", "Mar", "Feb", "Jan")) %>% 
+  group_by(month_name)
+
+##############################
+# summarize
+##############################
+
+MKO_summary <- MKO_temp_data %>%
+  dplyr::group_by(site) %>% 
+  dplyr::summarize(
+    mean_temp = mean(Temp_bot, na.rm = TRUE),
+    max_temp = max(Temp_bot, na.rm = TRUE),
+    min_temp = min(Temp_bot, na.rm = TRUE),
+    sd_temp = sd(Temp_bot, na.rm = TRUE),
+    se_temp = sd_temp/sqrt(length(Temp_bot)), na.rm = TRUE
+  )
+
+##############################
+# plot MKO density ridges plot (Fig 1)
+##############################
+
+MKO_densityridges_plot <- ggplot(MKO_temp_data, aes(x = Temp_bot, y = month_name, fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  geom_vline(xintercept = 11, linetype = "dashed", color = "darkgray") +
+  geom_vline(xintercept = 16, linetype = "dashed", color = "darkgray") +
+  geom_vline(xintercept = 21, linetype = "dashed", color = "darkgray") +
+  # coord_flip() +
+  scale_fill_gradientn(colors = c("steelblue4","lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
+  scale_x_continuous(breaks = seq(9, 26, by = 2)) +
+  labs(x = "Bottom Temperature (°C)", y = "Month") +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fil = NA, size = 0.7),
+        strip.background = element_rect(fill = "white"),
+        strip.text = element_text(size = 12)) 
+
+# cowplot::save_plot(here::here("figures", "main_text", "Fig1.pdf"), MKO_densityridges_plot, base_width = 6.5, base_height = 4.5)
+```
+
+####**Part 4.** Print density ridge plots for all sites for visual assessment
+```{r}
+##############################
+# filter out years that don't have data for some sites; add month abbreviations; set factor levels
+##############################
+
+temp_data_cleaned <- temp_data %>% 
+  filter(!year %in% c("1999", "2000", "2001", "2002", "2003", "2004")) %>% 
+  mutate(month = as.factor(month),
+         month_name = case_when(
+            month == "1" ~ "Jan",
+            month == "2" ~ "Feb",
+            month == "3" ~ "Mar",
+            month == "4" ~ "Apr",
+            month == "5" ~ "May",
+            month == "6" ~ "Jun",
+            month == "7" ~ "Jul",
+            month == "8" ~ "Aug",
+            month == "9" ~ "Sep",
+            month == "10" ~ "Oct",
+            month == "11" ~ "Nov",
+            month == "12" ~ "Dec"
+        )
+      ) %>% 
+  mutate(month_name = fct_relevel(month_name, "Dec", "Nov", "Oct", "Sep", "Aug", 
+                                  "Jul", "Jun", "May", "Apr", "Mar", "Feb", "Jan")) %>% 
+  group_by(month_name)
+
+##############################
+# identify all sites to plot
+##############################
+
+unique_sites <- unique(temp_data_cleaned$site)
+
+##############################
+# plot density ridges for all sites
+##############################
+
+# pdf(paste("lter_bottom_temp_densityridges_plot", Sys.Date(),".pdf", sep = "_"), onefile = TRUE, width = 10, height = 8)
+
+for(i in 1:length(unique_sites)) {
+  
+  lter_site <- unique_sites[i]
+  
+  print(lter_site)
+  
+  subset <- temp_data_cleaned %>% 
+    filter(site == lter_site)
+   
+  densityridges_plot <- ggplot(subset, aes(x = Temp_bot, y = month_name, fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  geom_vline(xintercept = 11, linetype = "dashed", color = "darkgray") +
+  geom_vline(xintercept = 16, linetype = "dashed", color = "darkgray") +
+  geom_vline(xintercept = 21, linetype = "dashed", color = "darkgray") +
+  scale_fill_gradientn(colors = c("steelblue4","lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
+  scale_x_continuous(breaks = seq(9, 26, by = 2)) +
+  labs(x = "Bottom Temperature (°C)", y = "Month", title = lter_site) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fil = NA, size = 0.7),
+        strip.background = element_rect(fill = "white"),
+        strip.text = element_text(size = 12)) 
+
+  plot(densityridges_plot)
+  
+}
+
+# dev.off()
+```
