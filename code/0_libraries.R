@@ -7,13 +7,13 @@ library(bbmle) # functional response analysis (in Bart's JAGS setup)
 # library(broom) # used alonside nls.multstart for tidying up model outputs
 # library(car) # model predictions
 library(chron) # working with dates 
-# library(corrplot) # correlation matrix
+library(corrplot) # correlation matrix
 library(cowplot) # organizing fig panels & printing plots
 # library(effsize) # calculate effect sizes 
 # library(frair) # fitting FR
 library(ggpubr) # (in Bart's JAGS setup)
 library(ggridges) # ridgeline plots for displaying LTER temps 
-# library(gridExtra) # ggMarginal for correlation plots 
+library(ggExtra) # ggMarginal for correlation plots 
 library(here) # because we love reproducibility 
 # library(Hmisc) # plotting CI using stat_summary
 # library(kableExtra) # knitting tables
