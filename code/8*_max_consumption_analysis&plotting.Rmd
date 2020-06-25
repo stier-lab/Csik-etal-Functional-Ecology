@@ -18,7 +18,7 @@ We examine the relationship between lobster maximum consumption rates and temper
 ###**Outline**
 
 **Part 0** Import packages and data
-**Part 1** Fit model to data
+**Part 1** (TABLE Fit model to data
 
 ###**Required Packages:**
 
