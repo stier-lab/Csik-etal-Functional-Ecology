@@ -1,0 +1,86 @@
+---
+title: "Correlational Analysis Between Lobster Metabolism and Foraging - Data Processing"
+author: "Sam Csik"
+date: "6/25/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+###**Outline**
+###**Required Packages**
+
+    - tidyverse
+    - here
+    
+###**Required Data**
+
+**(file path: data/metabolism/)**
+
+    - metabolic_traits.csv
+    - epoc.csv
+
+**(file path: data/functional_response/raw)**
+
+    - foraging_assay_data.csv
+    
+####**Part 0.** Import packages and data
+```{r}
+##############################
+# load required packages
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv"))
+
+foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+```
+
+####**Part 1.**
+```{r}
+##############################
+# metabolic rates
+##############################
+
+NEW_metabolic_rates <- metabolic_rates %>% 
+  dplyr::rename(lobster_id = ID) %>% 
+  select(lobster_id, temp, SMR_low15quant, mmr_overall, AS_SMR_low15quant, FAS_q15) %>% 
+  mutate(temp = as.character(temp)) 
+
+##############################
+# foraging assays
+##############################
+
+NEW_foraging_assays <- foraging_assays %>% 
+  filter(Initial == "60") %>% 
+  dplyr::group_by(lobster_id) %>% 
+  dplyr::summarize(avg_eaten = mean(Killed),
+            sd_eaten = sd(Killed),
+            se_eaten = sd(Killed/sqrt(length(Killed))),
+            error = qnorm(0.975) * sd(Killed)/sqrt(length(Killed)),
+            upper_95ci = avg_eaten + error,
+            lower_95ci = avg_eaten - error) %>% 
+  mutate(avg_eaten = as.numeric(avg_eaten))
+
+##############################
+# combine data sets
+##############################
+
+metabolism_foraging_data <- full_join(NEW_metabolic_rates, NEW_foraging_assays)
+
+##############################
+# print as csv
+##############################
+
+write.csv(metabolism_foraging_data, here::here("data", "correlations", "outputs", "metabolism_foraging_data.csv"))
+```
