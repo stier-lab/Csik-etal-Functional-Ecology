@@ -12,7 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ###**Summary**
+
+Combine metabolism and foraing data into the same data frame for correlational analysis and plotting
+
 ###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Wrangle and combine metabolism and foraging data
+
 ###**Required Packages**
 
     - tidyverse
@@ -46,7 +53,7 @@ metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.c
 foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
 ```
 
-####**Part 1.**
+####**Part 1.** Get both metabolism and foraging data into the same format; combine and print
 ```{r}
 ##############################
 # metabolic rates
@@ -73,14 +80,10 @@ NEW_foraging_assays <- foraging_assays %>%
   mutate(avg_eaten = as.numeric(avg_eaten))
 
 ##############################
-# combine data sets
+# combine data sets and print
 ##############################
 
 metabolism_foraging_data <- full_join(NEW_metabolic_rates, NEW_foraging_assays)
 
-##############################
-# print as csv
-##############################
-
-write.csv(metabolism_foraging_data, here::here("data", "correlations", "outputs", "metabolism_foraging_data.csv"))
+# write.csv(metabolism_foraging_data, here::here("data", "correlations", "outputs", "metabolism_foraging_data.csv"))
 ```
