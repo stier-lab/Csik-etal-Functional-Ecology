@@ -1,0 +1,91 @@
+---
+title: "Max Consumption Analysis"
+author: "Sam Csik"
+date: "6/24/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+We examine the relationship between lobster maximum consumption rates and temperature by fitting a linear mixed effects model to the data.
+
+###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Fit model to data
+
+###**Required Packages:**
+
+    - tidyverse
+    - lme4
+
+###**Required Data:**
+
+**(file path: data/functional_response/raw)**
+
+    - foraging_assay_data.csv
+
+####**Part 0.** Import libraries and data
+```{r}
+##############################
+# load required packages
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+```   
+
+####**Part 1.** Fit nonlinear mixed effects model to *ad lib* foraging trial data (60 mussels only) and generate table S9
+```{r}
+##############################
+# filter data for only trials with 60 mussels
+##############################
+
+foraging60 <- foraging_assays %>% 
+  filter(Initial == "60") %>% 
+  mutate(temp = as.factor(temp))
+
+##############################
+# fit lmer (3 levels (assays) per lobster, but need to account for lobster as random effect so still using this method)
+##############################
+
+consump_mod <- lmerTest::lmer(Killed ~ temp + (1|lobster_id), foraging60) # varying slope only
+summary(consump_mod)
+summary(multcomp::glht(consump_mod, linfct = multcomp::mcp(temp = "Tukey")))
+
+##############################
+# diagnostics
+##############################
+
+plot(consump_mod) # no obvious deviations from linear form; relatively constant variance for all data (good!)
+
+qqmath(consump_mod, id = 0.05) # id identifies values that may be exerting undue influence on the model (i.e. outliers); fairly normal (good)
+
+##############################
+# create table (manually edit aesthetics in Word)
+##############################
+
+tab_model(consump_mod, 
+          dv.labels = "mussels consumed",
+          pred.labels = c(`(Intercept)` = "Intercept",
+                          `temp [16]` = "16°C",
+                          `temp [21]` = "21°C",
+                          `temp [26]` = "26°C"),
+          string.pred = "Coefficient",
+          string.est = "Estimate",
+          show.se = TRUE,
+          string.se = "SE",
+          string.ci = "95% CI")
+```
+
