@@ -42,10 +42,18 @@ NOTE: Because many foraging assay trials for 11C-acclimated lobsters resulted in
     - tidyverse
     - here
 
-###**Requried Data:**
+###**Required Data:**
+
+**(file path: data/metabolism/)**
 
     - metabolic_traits.csv
+
+**(file path: data/functional_response/raw)**
+
     - foraging_assay_data.csv
+    
+**(file path: data/functional_reponse/outputs)**
+
     - ind_FR_estimates.csv
 
 ####**Part 0.** Import packages and data; also define Boltzmann's constant
