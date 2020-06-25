@@ -1,0 +1,67 @@
+
+                 
+                 model{
+                 
+                 
+                 # PRIORS
+                 
+                 # Population level estimates (hyperprior)
+                 
+                 mu.logit.a ~ dnorm(0, 0.01)
+                 mu.a <- exp(mu.logit.a)/(1+exp(mu.logit.a))
+                 
+                 mu.log.h ~ dnorm(0, 0.01)
+                 mu.h <- exp(max(min(mu.log.h, 20), -20))
+               
+            
+                 # Treatment level effects
+                 for(i in 1:Ntreats){
+                 #a
+                 t.logit.a[i] ~ dnorm(mu.logit.a, t.tau.a) # tau is a measure of variance (going to vary for each interaction of the model)
+                 t.a[i] <- exp(t.logit.a[i])/(1+exp(t.logit.a[i]))
+                 
+                 #h
+                 t.log.h[i] ~ dnorm(mu.log.h, t.tau.h)
+                 t.h[i] <- exp(max(min(t.log.h[i],20),-20))
+                 
+                 }
+                 
+                 
+                 # Individual level effects
+                 for(i in 1:num.ind){
+                 
+                 # a (make logit.a)
+                 loga[i] ~ dnorm(t.logit.a[tind[i]], tau_int.a) # priors come from normal dist
+                 a[i] <- exp(loga[i])/(1+exp(loga[i]))
+                 
+                 # h (make logit.h)
+                 logh[i] ~ dnorm(t.log.h[tind[i]], tau_int.h)
+                 h[i] <- exp(max(min(logh[i],10),-20))
+                 }
+                 
+                 # functional response likelihood
+                 
+                 for(i in 1:n){
+                 
+                 prob[i] <- max(0.0001,min(0.9999,T/(1/a[id[i]] + h[id[i]]*initial[i])))
+                 
+                 killed[i] ~ dbin(prob[i],initial[i]) # probability of being killed given any combo of a & h
+                 
+                 }
+                 
+                 
+                 
+                 # Variances for all levels 
+                 sigma_int.a ~dunif(0,10) # variance drawn from 0-10
+                 tau_int.a <- 1/(sigma_int.a*sigma_int.a) # transform var into precision and feed back into precision estimate for treatment level 
+                 sigma_int.h ~dunif(0,10)
+                 tau_int.h <- 1/(sigma_int.h*sigma_int.h)
+                 
+                 sigma_t.a ~ dunif(0,10)
+                 t.tau.a <- 1/(sigma_t.a*sigma_t.a)
+                 sigma_t.h ~ dunif(0,10)
+                 t.tau.h <- 1/(sigma_t.h*sigma_t.h)
+                 
+                 }
+                 
+                 
