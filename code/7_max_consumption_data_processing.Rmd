@@ -1,0 +1,76 @@
+---
+title: "Foraging Assay Data Processing"
+author: "Sam Csik"
+date: "6/23/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+Maximum consumption rate (*C*) is calculated as the total number of mussels consumed in a 24 h feeding assay out of 60 mussels (we consider this to be an *ad lib* feeding trial, as no lobster ever ate all 60 mussels).
+
+###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Calculate maximum consumption rates and summary stats for lobsters using *ad lib* feeding assay data (i.e. from trials with 60 mussels)
+
+###**Packages Required:**
+
+    - tidyverse
+    - here
+
+##**Data Required:**
+
+**(file path: data/functional_response/raw)**
+
+    - foraging_assay_data.csv
+
+####**Part 0.** Import libraries and data
+```{r}
+##############################
+# load required packages
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+```   
+
+####**Part 1.** Calculate summary stats for max consuumption data
+```{r}
+##############################
+# filter data for only trials with 60 mussels
+##############################
+
+foraging60 <- foraging_assays %>% 
+  filter(Initial == "60")
+
+##############################
+# summary stats
+##############################
+
+consump_summary <- foraging60 %>% 
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    consump_avg = round(mean(Killed),3),
+    consump_sd = round(sd(Killed),3),
+    consump_se = consump_sd/sqrt(length(Killed)),
+    consump_cv = consump_sd/consump_avg,
+    consump_max = max(Killed),
+    consump_min = min(Killed),
+    error = qnorm(0.975) * sd(Killed)/sqrt(length(Killed)),
+    upper_95ci = consump_avg + error,
+    lower_95ci = consump_avg - error
+  )
+```
