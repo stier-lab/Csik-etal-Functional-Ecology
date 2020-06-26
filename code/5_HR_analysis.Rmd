@@ -48,8 +48,7 @@ source(here::here("code", "0_libraries.R"))
 # load data
 ##############################
 
-all_hr <- read_csv(here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv")) %>% 
-  select(date2, lobster_id, temperature, hr, QI) 
+all_hr <- read_csv(here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv")) 
 ```
 
 ####**Part 1.** Calculate resting heart rate as the 15th percentile of each lobster's heart rate measurements (keeping consistent with SMR analyses)

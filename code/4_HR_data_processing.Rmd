@@ -17,7 +17,7 @@ Star-Oddi [DST milli-HRT loggers](https://www.star-oddi.com/products/archival-ta
 
 We successfully captured ~24hr of heart rate data for n = 3 lobsters per treatment, except for 26C lobsters (due to equipment malfunctions).
 
-See *Estimating lobster resting heart rates* in the methods section of the manuscript for additional details.
+To prepare data for analysis, we visually assessed electrocardiogram (ECG) traces to ensure that quality heart rates were estimated. Here, we wrangle the raw data files and print out ECG traces and heart rates (bpm) through time for visual assessment. We found that any erroneous recordings were often associated with two types of anomolous data: (1) In some cases, ECG traces appear irregular and corresponded to atypical heart rate recordings. This is presumably from insufficient contact between the logger's electrodes and the cardiac tissue. These recordings are noted in the `poor_signal_inventory.csv` file and subsequently removed from the data set. (2) Alternatively, arrested cardiac function was evident from a cessation in R wave signals in some ECGs. These instances were always associated with biologically unrealistic heart rates (bpm > 250). These recordings were noted in the `hr_stop_inventory.csv` file and subsequently replaced with "0 bpm."
 
 ###**Outline**
 
@@ -105,9 +105,11 @@ source(here::here("code", "0_libraries.R"))
 # used in for loops to import all data files
 heart_rate_metadata <- read_csv(here::here("data", "metadata", "metadata_heart_rate.csv"))
 
+# used for processing the data
 poor_signal_inventory <- read_csv(here::here("data", "heart_rate", "inventory_files", "poor_signal_inventory.csv")) %>% 
   filter(remove == "yes")
 
+# used for processing the data
 hr_stop_inventory <- read_csv(here::here("data", "heart_rate", "inventory_files", "hr_stop_inventory.csv")) %>% 
   filter(alter_bpm == "yes")
 ```
@@ -403,7 +405,10 @@ filtered21 <- keepers %>%
 
 processed_data <- rbind(filtered11, filtered16, filtered21) %>% 
   mutate(hr = as.numeric(hr),
-         temp = as.numeric(temp))
+         temp = as.numeric(temp)) %>% 
+  rename(date = date2) %>% 
+  select(date, temperature, lobster_id, hr, QI) %>% 
+  rename(temp = temperature)
 
 # write.csv(processed_data, here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv"), row.names = FALSE)
 ```
