@@ -49,9 +49,13 @@ At the start of each script and RMarkdown file, you will find a brief **summary*
 
 ### Figures
 
+`main_text`: contains pdf versions of Figures 1, 2, 3, 4, & 5 found in the main text of the manuscript
+`supplementary`: contains pdf version of Figures S1, S2, S3, & S4 found in the supplementary text
+`other`: contains plots of raw heart rate data (bpm & ecgs) used for manual data quality assessments
+
 ### Media
 
-Experiment photos used in this README
+Experimental photos used in this README
 
 ### Curious about what some of our experimental trials look like?
 ![Alt text](/media/respirometry.png?raw=true "A lobster inside an intermittent-flow respirometry chamber" )
