@@ -174,7 +174,7 @@ all_bpm <- rbind(IV10_bpm, IV11_bpm, IV12_bpm, IV13_bpm, IV14_bpm, MM02_bpm,
                 GP05_bpm, GP06_bpm, IV16_bpm, IV17_bpm, IV18_bpm, 
                 L3_bpm, L4_bpm, N14_bpm, N15_bpm, N19_bpm, 
                 GP01_bpm, GP07_bpm, IV19_bpm) %>% 
-  mutate(temp = as.factor(temp),
+  mutate(temperature = as.factor(temperature),
          lobster_id = fct_relevel(lobster_id, 
                                   "IV10", "IV11", "IV12", "IV13", "IV14","MM02",
                                   "GP05", "GP06", "IV16", "IV17", "IV18",
@@ -216,7 +216,7 @@ IDs <- unique(heart_rate_metadata$lobster_id)
 # for loop to plot hr through time for each lobster; color code by QI value
 ##############################
 
-# pdf(paste("figures/heart_rate/indiv_hr", "time_plot", Sys.Date(),".pdf", sep = "_"), onefile = TRUE, width = 9, height = 6)
+# pdf(paste("figures/other/bpm_assessment",".pdf", sep = "_"), onefile = TRUE, width = 9, height = 6)
 
 for(i in 1:length(IDs)){ # set range of 1 to the length of IDs
   
@@ -281,8 +281,8 @@ lob_ids <- unique(all_ecg$lobster_id)
 
 for(i in 1:length(lob_ids)) {
   lob_id = lob_ids[i] # for each lob...
-  pdf(paste("figures/heart_rate", lob_id, "ecg", Sys.Date(),".pdf"), onefile = TRUE, width = 9, height = 6)
-  make_ecg_pdf(lob_id) # do make_ecg_pdf()
+  pdf(paste("figures", lob_id, "ecg",".pdf", sep = "_"), onefile = TRUE, width = 9, height = 6)
+  make_ecg_pdf(lob_id)
   dev.off()
 }
 ```
@@ -293,7 +293,7 @@ Process data
 ---------------------------------
 ---------------------------------
 
-####**Part 5.** Select only usable lobsters; remove anomolous measurements (noted in `poor_signal_inventory.csv`); replace clear instances of arrested heart rates with "0" (noted in `hr_stop_inventory.csv`)
+####**Part 5.** Remove anomolous measurements (noted in `poor_signal_inventory.csv`); replace clear instances of arrested heart rates with "0" (noted in `hr_stop_inventory.csv`); select only usable lobsters
 ```{r}
 ##############################
 # post process bpm data
@@ -330,14 +330,17 @@ for (i in 1:nrow(all_bpm)) {
   
   # if there are values to be removed, enter "NA" in those rows
   if (nrow(poor_signal_subset) > 0) {
-    # clean_count should be equal to the number of rows in cleaning_inventory
+    # clean_count should be equal to the number of rows in poor_signal_inventory
+    print("----------------------")
+    print("hey i'm removing stuff")
+    print(all_bpm[i,])
     clean_count <- clean_count + 1
-    all_bpm[i,][1] <- as.character("NA")
-    all_bpm[i,][2] <- as.character("NA")
-    all_bpm[i,][3] <- as.character("NA")
-    all_bpm[i,][4] <- as.character("NA")
-    all_bpm[i,][5] <- as.factor("NA")
-    all_bpm[i,][6] <- as.character("NA")
+    all_bpm[i,][1] <- NA
+    all_bpm[i,][2] <- NA
+    all_bpm[i,][3] <- NA
+    all_bpm[i,][4] <- NA
+    all_bpm[i,][5] <- NA
+    all_bpm[i,][6] <- NA
     new_df <- rbind(new_df, poor_signal_subset)
   }
   
@@ -348,12 +351,12 @@ for (i in 1:nrow(all_bpm)) {
   }
 }
 
-# print any rows that are missing from cleaning_inventory
+# print any rows that are missing from poor_signal_inventory
 for (i in 1:nrow(poor_signal_inventory)) {
   current_row <- poor_signal_inventory[i,]
   ts <- as.character(current_row[2][[1]])
   lob_id <- as.character(current_row[1][[1]])
-    # subset removal values
+  # subset removal values
   sub <- new_df %>% 
     filter(lobster_id == lob_id) %>% 
     filter(time == ts)
@@ -363,20 +366,6 @@ for (i in 1:nrow(poor_signal_inventory)) {
     print(ts)
   }
 }
-
-# print old and new data to make sure it's replacing hr with correct value from inventory
-# for (i in 1:nrow(hr_inventory)) {
-#   current_row <- hr_inventory[i,]
-#   ts <- as.character(current_row[2][[1]])
-#   lob_id <- as.character(current_row[1][[1]])
-#   data_subset <- all_bpm %>% 
-#     filter(lobster_id == lob_id) %>% 
-#     filter(date_time == ts)
-#   print(lob_id)
-#   print("----------")
-#   print(current_row)
-#   print(data_subset)
-# }
 
 ##############################
 # I'm only going to keep lobs: 
