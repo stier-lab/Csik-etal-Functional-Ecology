@@ -53,7 +53,7 @@ At the start of each script and RMarkdown file, you will find a brief **summary*
 
 Experiment photos used in this README
 
-# Curious about what some of our experimental trials look like?
+### Curious about what some of our experimental trials look like?
 ![Alt text](/media/respirometry.png?raw=true "A lobster inside an intermittent-flow respirometry chamber" )
 ![Alt text](/media/foraging.png?raw=true "Munching on mussels during a foraging trial")
 ![Alt text](/media/heart.png?raw=true "Heart rate loggers are implanted under the carapace, then the incision is sealed using dental wax")
