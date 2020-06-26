@@ -47,25 +47,31 @@ At the start of each script and RMarkdown file, you will find a brief **summary*
 
 # Data
 
-The `data` folder contains both raw and processed data an inventory files used for mass processing raw heart rate data. Metadata for these can be found below:
+The following three files are the primary data used for all analyses. Their metadata are detailed below: 
 
-## `data/metabolism/`
+### * `data/heart_rate/outputs/processed_heart_rates.csv`
+* `date`: date/time of data point collection
+* `temp`: acclimation temperature
+* `lobster_id`: unique lobster identifier
+* `hr`: heart rate (beats min^-1^)
+* `QI`: Quality index score ranging from 0 (good) to 3 (poor); NOTE: these data have been visually assessed for quality and therefore any hr with a QI = 1-3 was determined to still be an accurate measure.
 
-### * `metabolic_traits.csv`
-* `file_name`:
+### * `dataa/metabolism/metabolic_traits.csv`
+* `temp`: acclimation temperature
+* `ID`: unique lobster identifier
+* `BW`: body weight of lobster (g)
+* `SMR`: standard metabolic rate (mg O~2~ kg^-1^ min^-1^), calculated as the 15th percentile MO~2~ measurement
+* `MMR`: maximum metabolic rate (mg O~2~ kg^-1^ min^-1^), calculated as the fastest rate of linear O~2~ decline over a 60s inverval
+* `AAS`: absolute aerobic scope (mg O~2~ kg^-1^ min^-1^); calculated as MMR-SMR
+* `FAS`: factorial aerobic scope (unitless); calculated as MMR/SMR
 
-
-## `data/foraging/raw/`
-
-### * `foraging_assay_data.csv`
+### * `data/foraging/raw/foraging_assay_data.csv`
 * `date`: date the foraging asssay began on (each assay ran for 24h)
 * `trial`: trial number; feeding assays were replicated three times per lobster at each of the five prey densities
-* `lobster_id`: unique identifier 
+* `lobster_id`: unique lobster identifier 
 * `Initial`: number of mussels available at the start of the feeding assay
 * `Killed`: number of mussels consumed by the end of the feeding assay
 * `temp`: acclimation tempeature
-
-### * `
 
 # Figures
 
