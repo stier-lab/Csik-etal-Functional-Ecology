@@ -1,6 +1,6 @@
 # Csik_etal_Functional_Ecology
 
-This repo is maintained by Samantha Csik (GitHub: [@samanthacsik](https://github.com/samanthacsik)) who completed her Master's thesis with in the Stier Lab at the University of California, Santa Barbara (Department of Ecology, Evolution, & Marine Biology).
+This repo is maintained by Samantha Csik (GitHub: [@samanthacsik](https://github.com/samanthacsik)) who completed her Master's thesis in the Stier Lab at the University of California, Santa Barbara (Department of Ecology, Evolution, & Marine Biology).
 
 # Code 
 
