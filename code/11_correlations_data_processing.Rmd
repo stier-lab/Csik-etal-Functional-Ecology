@@ -32,7 +32,7 @@ Combine metabolism and foraing data into the same data frame for correlational a
     - metabolic_traits.csv
     - epoc.csv
 
-**(file path: data/functional_response/raw)**
+**(file path: data/foraging/raw)**
 
     - foraging_assay_data.csv
     
@@ -50,7 +50,7 @@ source(here::here("code", "0_libraries.R"))
 
 metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv"))
 
-foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv")) 
 ```
 
 ####**Part 1.** Get both metabolism and foraging data into the same format; combine and print

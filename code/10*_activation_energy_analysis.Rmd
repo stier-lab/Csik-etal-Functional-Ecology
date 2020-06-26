@@ -48,11 +48,11 @@ NOTE: Because many foraging assay trials for 11C-acclimated lobsters resulted in
 
     - metabolic_traits.csv
 
-**(file path: data/functional_response/raw)**
+**(file path: data/foraging/raw)**
 
     - foraging_assay_data.csv
     
-**(file path: data/functional_reponse/outputs)**
+**(file path: data/foraging/outputs)**
 
     - ind_FR_estimates.csv
 
@@ -70,9 +70,9 @@ source(here::here("code", "0_libraries.R"))
 
 metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv")) 
 
-foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv")) 
 
-functional_response_params <- read_csv(here::here("data", "functional_response", "outputs", "ind_FR_estimates.csv"))
+functional_response_params <- read_csv(here::here("data", "foraging", "outputs", "ind_FR_estimates.csv"))
 
 ##############################
 # Boltzmann's constant (k)

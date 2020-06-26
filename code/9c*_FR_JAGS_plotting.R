@@ -17,7 +17,7 @@
 
 ###**Required Data:**
 
-# (file path: data/functional_response/raw)
+# (file path: data/foraging/raw)
 
     # - foraging_assay_data.csv
 

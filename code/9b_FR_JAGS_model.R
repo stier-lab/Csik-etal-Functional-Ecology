@@ -9,7 +9,7 @@ source(here::here("code","9a_JAGS_functions.R"))
 # import foraging assay data
 ##############################
 
-foraging_data <- read.csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv"))
+foraging_data <- read.csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv"))
 
 ##############################
 # some wrangling

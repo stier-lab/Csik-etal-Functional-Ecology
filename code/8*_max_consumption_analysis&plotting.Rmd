@@ -28,7 +28,7 @@ We examine the relationship between lobster maximum consumption rates and temper
 
 ###**Required Data:**
 
-**(file path: data/functional_response/raw)**
+**(file path: data/foraging/raw)**
 
     - foraging_assay_data.csv 
     - max_consump_summary_stats.csv
@@ -45,9 +45,9 @@ source(here::here("code", "0_libraries.R"))
 # load data
 ##############################
 
-foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv")) 
 
-mc_summary <- read_csv(here::here("data", "functional_response", "outputs", "max_consump_summary_stats.csv"))
+mc_summary <- read_csv(here::here("data", "foraging", "outputs", "max_consump_summary_stats.csv"))
 ```   
 
 ####**Part 1.** Fit nonlinear mixed effects model to *ad lib* foraging trial data (60 mussels only) and generate table S9

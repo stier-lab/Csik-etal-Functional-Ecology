@@ -39,9 +39,11 @@ knitr::opts_chunk$set(echo = TRUE)
     - rhr_summary_stats.csv
     - processed_heart_rates.csv
 
-**(file path: data/functional_response/outputs)**
+**(file path: data/foraging/outputs)**
 
     - max_consump_summary_stats.csv
+    - a_summary_stats.csv
+    - h_summary_stats.csv
     - foraging_assay_data.csv
     
 ####**Part 0.** Import packages and data
@@ -66,15 +68,15 @@ fas_summary <- read_csv(here::here("data", "metabolism", "outputs", "fas_summary
 
 rhr_summary <- read_csv(here::here("data", "heart_rate", "outputs", "rhr_summary_stats.csv"))
 
-mc_summary <- read_csv(here::here("data", "functional_response", "outputs", "max_consump_summary_stats.csv"))
+mc_summary <- read_csv(here::here("data", "foraging", "outputs", "max_consump_summary_stats.csv"))
 
-a_summary <- read_csv(here::here("data", "functional_response", "outputs", "a_summary_stats.csv"))
+a_summary <- read_csv(here::here("data", "foraging", "outputs", "a_summary_stats.csv"))
 
-h_summary <- read_csv(here::here("data", "functional_response", "outputs", "h_summary_stats.csv"))
+h_summary <- read_csv(here::here("data", "foraging", "outputs", "h_summary_stats.csv"))
 
 all_hr <- read_csv(here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv"))
 
-foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv"))
+foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv"))
 ```
 
 ####**Part 1.** Isolate mean values for use in following calculations

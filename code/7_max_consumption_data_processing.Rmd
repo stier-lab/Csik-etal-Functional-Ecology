@@ -27,7 +27,7 @@ Maximum consumption rate (*C*) is calculated as the total number of mussels cons
 
 ##**Data Required:**
 
-**(file path: data/functional_response/raw)**
+**(file path: data/foraging/raw)**
 
     - foraging_assay_data.csv
 
@@ -43,7 +43,7 @@ source(here::here("code", "0_libraries.R"))
 # load data
 ##############################
 
-foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) 
+foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv")) 
 ```   
 
 ####**Part 1.** Calculate summary stats for max consuumption data
