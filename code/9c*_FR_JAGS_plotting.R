@@ -309,3 +309,43 @@ treatment_coef_plot <- treat_plot +
 coef_plot <- cowplot::plot_grid(treatment_coef_plot, indiv_coef_plot, nrow = 2, labels = "AUTO", align = "vh")
 
 # cowplot::save_plot(here::here("figures", "FigS1.pdf"), coef_plot, base_width = 8, base_height = 8)
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
+# Summary stats
+##########################################################################################
+##########################################################################################
+##########################################################################################
+
+# attack rates
+a_summary <- df.ind.estimates %>% 
+  filter(parameter == "a") %>% 
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    a_avg = round(mean(estimate),3),
+    a_sd = round(sd(estimate),3),
+    a_se = a_sd/sqrt(length(estimate)),
+    a_cv = a_sd/a_avg,
+    a_max = max(estimate),
+    a_min = min(estimate)
+  )
+
+write.csv(a_summary, here::here("data", "functional_response", "outputs", "a_summary_stats.csv"), row.names = FALSE)
+
+# handling time
+h_summary <- df.ind.estimates %>% 
+  filter(parameter == "h") %>% 
+  mutate(temp = as.factor(temp)) %>% 
+  dplyr::group_by(temp) %>% 
+  dplyr::summarize(
+    h_avg = round(mean(estimate),3),
+    h_sd = round(sd(estimate),3),
+    h_se = h_sd/sqrt(length(estimate)),
+    h_cv = h_sd/h_avg,
+    h_max = max(estimate),
+    h_min = min(estimate)
+  )
+
+write.csv(h_summary, here::here("data", "functional_response", "outputs", "h_summary_stats.csv"), row.names = FALSE)
