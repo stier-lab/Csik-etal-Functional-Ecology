@@ -47,15 +47,25 @@ At the start of each script and RMarkdown file, you will find a brief **summary*
 
 # Data
 
-The `data` folder contains both raw and processed data. Metadata for each file can be found below:
+The `data` folder contains both raw and processed data an inventory files used for mass processing raw heart rate data. Metadata for these can be found below:
 
-## `foraging_assay_data.csv`
+## `data/metabolism/`
+
+### * `metabolic_traits.csv`
+* `file_name`:
+
+
+## `data/foraging/raw/`
+
+### * `foraging_assay_data.csv`
 * `date`: date the foraging asssay began on (each assay ran for 24h)
 * `trial`: trial number; feeding assays were replicated three times per lobster at each of the five prey densities
 * `lobster_id`: unique identifier 
-* `Initial`: number of prey available at the start of the feeding assay
-* `Killed`: number of prey consumed by the end of the feeding assay
+* `Initial`: number of mussels available at the start of the feeding assay
+* `Killed`: number of mussels consumed by the end of the feeding assay
 * `temp`: acclimation tempeature
+
+### * `
 
 # Figures
 
