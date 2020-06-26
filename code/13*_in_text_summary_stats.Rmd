@@ -1,0 +1,268 @@
+---
+title: "Effect Sizes, CV, Q10, and Other Summary Stats"
+author: "Sam Csik"
+date: "6/25/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+###**Outline**
+
+**Part 0** Import packages and data
+**Part 1** Isolate averages by temperature for use in subsequent calculations
+**Part 2** Calculate Q~10~ between temperatures
+**Part 3** Calculate in-text values
+
+###**Required Packages:**
+
+    - tidyverse
+    - here
+
+###**Required Data:**
+
+**(file path: data/metabolism/outputs)**
+
+    - smr_summary_stats.csv
+    - mmr_summary_stats.csv
+    - aas_summary_stats.csv
+    - fas_summary_stats.csv
+
+**(file path: data/heart_rate/outputs)**
+
+    - rhr_summary_stats.csv
+    - processed_heart_rates.csv
+
+**(file path: data/functional_response/outputs)**
+
+    - max_consump_summary_stats.csv
+    - foraging_assay_data.csv
+    
+####**Part 0.** Import packages and data
+```{r}
+##############################
+# load required packages
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+smr_summary <- read_csv(here::here("data", "metabolism", "outputs", "smr_summary_stats.csv"))
+
+mmr_summary <- read_csv(here::here("data", "metabolism", "outputs", "mmr_summary_stats.csv"))
+
+aas_summary <- read_csv(here::here("data", "metabolism", "outputs", "aas_summary_stats.csv"))
+
+fas_summary <- read_csv(here::here("data", "metabolism", "outputs", "fas_summary_stats.csv"))
+
+rhr_summary <- read_csv(here::here("data", "heart_rate", "outputs", "rhr_summary_stats.csv"))
+
+mc_summary <- read_csv(here::here("data", "functional_response", "outputs", "max_consump_summary_stats.csv"))
+
+a_summary <- read_csv(here::here("data", "functional_response", "outputs", "a_summary_stats.csv"))
+
+h_summary <- read_csv(here::here("data", "functional_response", "outputs", "h_summary_stats.csv"))
+
+all_hr <- read_csv(here::here("data", "heart_rate", "outputs", "processed_heart_rates.csv"))
+
+foraging_assays <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv"))
+```
+
+####**Part 1.** Isolate mean values for use in following calculations
+```{r}
+##############################
+# smr averages
+##############################
+
+smr11_avg <- smr_summary[1,2]
+smr16_avg <- smr_summary[2,2]
+smr21_avg <- smr_summary[3,2]
+smr26_avg <- smr_summary[4,2]
+
+##############################
+# mmr averages
+##############################
+
+mmr11_avg <- mmr_summary[1,2]
+mmr16_avg <- mmr_summary[2,2]
+mmr21_avg <- mmr_summary[3,2]
+mmr26_avg <- mmr_summary[4,2]
+
+##############################
+# aas averages
+##############################
+
+aas11_avg <- aas_summary[1,2]
+aas16_avg <- aas_summary[2,2]
+aas21_avg <- aas_summary[3,2]
+aas26_avg <- aas_summary[4,2]
+
+##############################
+# fas averages
+##############################
+
+fas11_avg <- fas_summary[1,2]
+fas16_avg <- fas_summary[2,2]
+fas21_avg <- fas_summary[3,2]
+fas26_avg <- fas_summary[4,2]
+
+##############################
+# rhr averages
+##############################
+
+rhr11_avg <- rhr_summary[1,2]
+rhr16_avg <- rhr_summary[2,2]
+rhr21_avg <- rhr_summary[3,2]
+
+##############################
+# max consumption averages
+##############################
+
+mc11_avg <- mc_summary[1,2]
+mc16_avg <- mc_summary[2,2]
+mc21_avg <- mc_summary[3,2]
+mc26_avg <- mc_summary[4,2]
+```
+
+####**Part 2.** Q~10~ calculations; Q~10~ = (R2/R1)^(10/(T2-T1)))
+```{r}
+##############################
+# smr Q10
+##############################
+
+Q10_11to26 <- (smr26_avg/smr11_avg) ^(10/(26-11))
+Q10_11to16 <- (smr16_avg/smr11_avg) ^(10/(16-11))
+Q10_16to21 <- (smr21_avg/smr16_avg) ^(10/(21-16))
+Q10_21to26 <- (smr26_avg/smr21_avg) ^(10/(26-21))
+
+##############################
+# mmr Q10
+##############################
+
+mmr_Q10_11to26 <- (mmr26_avg/mmr11_avg) ^(10/(26-11))
+mmr_Q10_11to16 <- (mmr16_avg/mmr11_avg) ^(10/(16-11))
+mmr_Q10_16to21 <- (mmr21_avg/mmr16_avg) ^(10/(21-16))
+mmr_Q10_21to26 <- (mmr26_avg/mmr21_avg) ^(10/(26-21))
+
+##############################
+# rhr Q10
+##############################
+
+rhr_Q10_11to21 <- (rhr21_avg/rhr11_avg) ^(10/(21-11))
+rhr_Q10_11to16 <- (rhr16_avg/rhr11_avg) ^(10/(16-11))
+rhr_Q10_16to21 <- (rhr21_avg/rhr16_avg) ^(10/(21-16))
+
+##############################
+# max consumption Q10
+##############################
+
+mc_Q10_11to26 <- (mc26_avg/mc11_avg) ^(10/(26-11))
+mc_Q10_11to16 <- (mc16_avg/mc11_avg) ^(10/(16-11))
+mc_Q10_16to21 <- (mc21_avg/mc16_avg) ^(10/(21-16))
+mc_Q10_21to26 <- (mc26_avg/mc21_avg) ^(10/(26-21))
+```
+
+####**Part 3.** Values reported in-text
+```{r}
+# "SMR increased linearly by approximately 110% for each 5°C increase in temperature"
+((smr26_avg - smr11_avg)/smr11_avg * 100)/3
+
+# "For example, inter-individual variation in SMR at 11°C was 1.7 times greater than that observed among individuals at 16°C""
+smr11_cv <- smr_summary[1,5]
+smr16_cv <- smr_summary[2,5]
+smr16_cv/smr11_cv
+
+# "On average, resting heart rate (fH) increased by approximately 88.8% for each 5°C increase in temperature "
+((rhr21_avg - rhr11_avg)/rhr11_avg * 100)/2
+
+# "Heart rates intermittently stopped, which corresponded to periods of apnea, however this phenomenon was most common in 11°C-acclimated lobsters where heart rates stopped in 7.7% of recordings, as compared to less than 0.3% of the recordings for 16 and 21°C-acclimated lobsters."
+percent_hr_stop <- all_hr %>% 
+  dplyr::group_by(temperature) %>% 
+  dplyr::summarize(
+    number_stop = sum(hr < 2),
+    number_go = sum(hr > 2),
+    perc_stopped  = number_stop/number_go
+  )
+
+# "Maximum consumption rates increased 9.6-fold from the lowest (11°C) to the highest (26°C) temperature"
+mc26_avg/mc11_avg
+
+# "Zero mussels were consumed in 50% of ad libitum feeding assays conducted on 11°C-acclimated lobsters"
+foraging60_at11C <- foraging_assays %>% 
+  filter(temp == "11", 
+         Initial == "60") %>% # total ad lib assays at 11C = 18
+  filter(Killed == "0") # total ad lib assays where 0 mussels were consumed at 11C = 9
+
+# "Despite bottom temperatures that frequently approach and even surpass 11°C (Fig. 1) in Santa Barbara Channel kelp forests, lobsters had SMRs that were, on average, 69.6% lower than lobsters acclimated to the regional near maximum of 21°C."
+(smr21_avg - smr11_avg)/smr21_avg * 100
+
+# "Lobster movement and activity within holding tanks was minimal in comparison to lobsters in other treatments (personal observation) and individuals consumed no mussels in 54.4% of all feeding assays, regardless of mussel density"
+foraging60 <- foraging_assays %>% 
+  filter(temp == "11") %>%  # 90 total feeding assays at 11C
+  filter(Killed == "0") # 49 feeding assays where 0 mussels were consumed at 11C
+
+49/90
+
+# "If we consider the approximate temperature range in the Santa Barbara Channel (11-21°C), we find that the thermal sensitivity of lobster maximum consumption rates is ~39-fold higher at the colder (i.e. 11-16°C) versus warmer (i.e. 16-21°C) end of this range"
+mc_Q10_11to16/mc_Q10_16to21
+
+# "For example, if we assume that the average maximum consumption rate at 21°C is the most that lobsters are capable of consuming in the Santa Barbara Channel region, lobsters are able to recover 91.4% of their maximum consumption capacity when temperatures increase from 11 to 16°C"
+mc16_avg/mc21_avg
+
+# "The increase in lobster SMR (Ea, SMR)) was 2-fold stronger than the increase in lobster maximum consumption rates (Ea, C)) across mid to high temperatures (16-26°C; Fig A3, Table A9), challenging the MTE prediction that temperature drives proportional increases in standard metabolic rate and predation (Brown et al. 2004)"
+Ea_smr <- 0.7006
+Ea_mc <- 0.3381
+Ea_smr/Ea_mc
+```
+
+####**Part 4.** Create plot of CVs (Fig S2)
+```{r}
+##############################
+# isolate CVs
+##############################
+
+SMR_cv <- smr_summary %>% mutate(type = rep("SMR")) %>% dplyr::rename(CV = SMR_cv) %>% select(temp, type, CV)
+
+MMR_cv <- mmr_summary %>% mutate(type = rep("MMR")) %>% dplyr::rename(CV = MMR_cv) %>% select(temp, type, CV)
+
+AS_cv <- aas_summary %>% mutate(type = rep("AS")) %>% dplyr::rename(CV = AS_cv) %>% select(temp, type, CV)
+
+MC_cv <- mc_summary %>% mutate(type = rep("Max Consumption")) %>% dplyr::rename(CV = consump_cv) %>% select(temp, type, CV)
+
+a_cv <- a_summary %>% mutate(type = rep("Attack Rate")) %>% dplyr::rename(CV = a_cv) %>% select(temp, type, CV)
+
+h_cv <- h_summary %>% mutate(type = rep("Handling Time")) %>% dplyr::rename(CV = h_cv) %>% select(temp, type, CV)
+
+##############################
+# combine into single df
+##############################
+
+all_cv <- rbind(SMR_cv, MMR_cv, AS_cv, MC_cv, a_cv, h_cv) %>%
+  dplyr::rename(Parameter = type) %>%
+  mutate(Parameter = fct_relevel(Parameter, "SMR", "MMR", "AS", "Max Consumption", "Attack Rate", "Handling Time"))
+
+##############################
+# plot
+##############################
+
+CV_plot <- ggplot(all_cv, aes(x = temp, y = CV, fill = Parameter)) +
+  geom_jitter(aes(shape = Parameter), size = 4, width = 0.2) +
+  labs(x = "Temperature (°C)", y = "Coefficient of Variation") +
+  theme_classic() + 
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0))
+
+# cowplot::save_plot(here::here("figures", "FigS2.pdf"), CV_plot, base_width = 5.5, base_height = 4)
+```
+
