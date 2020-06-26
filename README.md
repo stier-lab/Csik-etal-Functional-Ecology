@@ -37,7 +37,7 @@ Csik-etal-Functional-Ecology
 
 ### Software
 
-This analysis was performed in R (version 3.6.3).
+These analyses were performed in R (version 3.6.3).
 
 ### Code 
 
