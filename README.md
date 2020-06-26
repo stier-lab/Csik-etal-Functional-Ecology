@@ -1,6 +1,20 @@
 # Csik_etal_Functional_Ecology
 
-This repo is maintained by Samantha Csik (GitHub: [@samanthacsik](https://github.com/samanthacsik)) who completed her Master's thesis in the Stier Lab at the University of California, Santa Barbara (Department of Ecology, Evolution, & Marine Biology).
+This repository contains the code and data for reproducing Csik *et al* **YEAR** (to be submitted to Functional Ecology): **"TITLE HERE"** (**URL HERE**)
+
+The DOI for this code and data repository is managed through Dryad with DOI number **NUMBER HERE** (**LINK HERE**).
+
+> **Title:** 
+
+> **Authors:** Samantha R. Csik, Bartholomew P. DiFiore, Krista Kraskura, Emily A. Hardison, Joseph S. Curtis, Erika J. Eliason, Christopher L. Jerde, Adrian C. Stier
+
+> **Abstract:**  
+
+# Repository Structure
+
+# Software
+
+This analysis was performed in R (version 3.6.3).
 
 # Code 
 
