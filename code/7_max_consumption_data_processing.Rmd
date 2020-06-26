@@ -73,4 +73,6 @@ consump_summary <- foraging60 %>%
     upper_95ci = consump_avg + error,
     lower_95ci = consump_avg - error
   )
+
+# write.csv(consump_summary, here::here("data", "functional_response", "outputs", "max_consump_summary_stats.csv"), row.names = FALSE)
 ```
