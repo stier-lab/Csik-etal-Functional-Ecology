@@ -10,7 +10,7 @@ The DOI for this code and data repository is managed through Dryad with DOI numb
 
 > **Abstract:**  
 
-### Repository Structure
+# Repository Structure
 
 ```
 Csik-etal-Functional-Ecology
@@ -35,29 +35,39 @@ Csik-etal-Functional-Ecology
   |_ media
 ```
 
-### Software
+# Software
 
 These analyses were performed in R (version 3.6.3).
 
-### Code 
+# Code 
 
 Code is meant to be run in the order designated by the file name numbers (e.g. `0_libraries.R` should be run first, `13_in_text_summary_stats.Rmd` should be run last). The only exception to this is the `FR_JAGS` series (number 9) -- only `9c_FR_JAGS_plotting.R` needs to be run (both `9a_FR_JAGS_functions.R` and `9b_FR_JAGS_model.R` are sourced into this file and do not need to be opened separately to run analyses).
 
 At the start of each script and RMarkdown file, you will find a brief **summary** of the analyses to follow, an **outline** of code chunks/subsections, any **required packages**, and **required data** (along with their file paths for ease of locating).
 
-### Data
+# Data
 
-### Figures
+The `data` folder contains both raw and processed data. Metadata for each file can be found below:
+
+## `foraging_assay_data.csv`
+* `date`: date the foraging asssay began on (each assay ran for 24h)
+* `trial`: trial number; feeding assays were replicated three times per lobster at each of the five prey densities
+* `lobster_id`: unique identifier 
+* `Initial`: number of prey available at the start of the feeding assay
+* `Killed`: number of prey consumed by the end of the feeding assay
+* `temp`: acclimation tempeature
+
+# Figures
 
 * `main_text`: contains pdf versions of Figures 1, 2, 3, 4, & 5 found in the main text of the manuscript
 * `supplementary`: contains pdf version of Figures S1, S2, S3, & S4 found in the supplementary text
 * `other`: contains plots of raw heart rate data (bpm & ecgs) used for manual data quality assessments
 
-### Media
+# Media
 
-Experimental photos used in this README
+Experimental photos used in this README.
 
-### Curious about what some of our experimental trials look like?
+# Curious about what some of our experimental trials look like?
 ![Alt text](/media/respirometry.png?raw=true "A lobster inside an intermittent-flow respirometry chamber" )
 ![Alt text](/media/foraging.png?raw=true "Munching on mussels during a foraging trial")
 ![Alt text](/media/heart.png?raw=true "Heart rate loggers are implanted under the carapace, then the incision is sealed using dental wax")
