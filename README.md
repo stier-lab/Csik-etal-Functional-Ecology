@@ -17,9 +17,16 @@ Csik-etal-Functional-Ecology
   |_ code
   |_ data
     |_ correlations
+      |_ outputs
     |_ foraging
+      |_ outputs
+      |_ raw
     |_ heart_rate
+      |_ inventory_files
+      |_ outputs
+      |_ raw
     |_ metabolism
+      |_ outputs
     |_ metadata
   |_ figures
     |_ main_text
@@ -33,6 +40,10 @@ Csik-etal-Functional-Ecology
 This analysis was performed in R (version 3.6.3).
 
 ### Code 
+
+Code is meant to be run in the order designated by the file name numbers (e.g. `0_libraries.R` should be run first, `13_in_text_summary_stats.Rmd` should be run last). The only exception to this is the `FR_JAGS` series (number 9) -- only `9c_FR_JAGS_plotting.R` needs to be run (both `9a_FR_JAGS_functions.R` and `9b_FR_JAGS_model.R` are sourced into this file and do not need to be opened separately to run analyses).
+
+At the start of each script and RMarkdown file, you will find a brief **summary** of the analyses to follow, an **outline** of code chunks/subsections, any **required packages**, and **required data** (along with their file paths for ease of locating).
 
 ### Data
 
