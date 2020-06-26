@@ -1,4 +1,4 @@
-# Csik_etal_Functional_Ecology
+# Csik-etal-Functional-Ecology
 
 This repository contains the code and data for reproducing Csik *et al* **YEAR** (to be submitted to Functional Ecology): **"TITLE HERE"** (**URL HERE**)
 
@@ -16,7 +16,16 @@ The DOI for this code and data repository is managed through Dryad with DOI numb
 Csik-etal-Functional-Ecology
   |_ code
   |_ data
+    |_ correlations
+    |_ foraging
+    |_ heart_rate
+    |_ metabolism
+    |_ metadata
   |_ figures
+    |_ main_text
+    |_ other
+    |_ supplemental
+  |_ media
 ```
 
 ### Software
