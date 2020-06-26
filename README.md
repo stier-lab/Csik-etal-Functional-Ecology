@@ -12,6 +12,13 @@ The DOI for this code and data repository is managed through Dryad with DOI numb
 
 ### Repository Structure
 
+```
+Csik-etal-Functional-Ecology
+  |_ code
+  |_ data
+  |_ figures
+```
+
 ### Software
 
 This analysis was performed in R (version 3.6.3).
