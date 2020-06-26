@@ -10,19 +10,19 @@ The DOI for this code and data repository is managed through Dryad with DOI numb
 
 > **Abstract:**  
 
-# Repository Structure
+### Repository Structure
 
-# Software
+### Software
 
 This analysis was performed in R (version 3.6.3).
 
-# Code 
+### Code 
 
-# Data
+### Data
 
-# Figures
+### Figures
 
-# Media
+### Media
 
 Experiment photos used in this README
 
