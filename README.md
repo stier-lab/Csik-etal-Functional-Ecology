@@ -75,9 +75,9 @@ The following three files are the primary data used for all analyses. Their meta
 
 # Figures
 
-* `main_text`: contains pdf versions of Figures 1, 2, 3, 4, & 5 found in the main text of the manuscript
-* `supplementary`: contains pdf version of Figures S1, S2, S3, & S4 found in the supplementary text
-* `other`: contains plots of raw heart rate data (bpm & ecgs) used for manual data quality assessments
+* `/main_text`: contains pdf versions of Figures 1, 2, 3, 4, & 5 found in the main text of the manuscript
+* `/supplementary`: contains pdf version of Figures S1, S2, S3, & S4 found in the supplementary text
+* `/other`: contains plots of raw heart rate data (bpm & ecgs) used for manual data quality assessments
 
 ### Media
 
