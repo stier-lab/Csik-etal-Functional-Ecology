@@ -13,18 +13,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###**Summary**
 
-I apply the logic in [Englund et al. 2011](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2011.01661.x) for modeling attack rates and max intake rates as a function of temperature to my metabolism and foraging data data by plotting ln(rate) ~ -1/kT and fitting a linear model to estimate the slope, E~a~.
+I apply the logic in [Englund et al. 2011](https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1461-0248.2011.01661.x) for modeling attack rates and max intake rates as a function of temperature to my metabolism and foraging data data by plotting ln(rate) ~ -1/kT and fitting a linear model to estimate the activation energy , E~a~, for each rate.
 
 According to Englund et al. 2011, a and I~max~ should be functions of the Arrhenius temperature, -1/(kT) where k is Boltzmann's constant (eV K^-1^) and T is temperature (Kelvin).
 
 You can then fit the Arrhenius equation: 
 
-Y = c*e*^E~a~(-1/kT)^ to the data where Y is a rate rate, c is a fitted constant, and E~a~ is the fitted activation energy (eV) that describes the slope of the response.
+Y = c*e*^E~a~(-1/kT)^ to the data where Y is a reaction rate, c is a fitted constant, and E~a~ is the fitted activation energy (eV) that describes the slope of the response.
 
 I estimate E~a~ using the linearized form of the equation: 
 
-log(y) = log(ce^E~a~(-1/kT)^)
-log(y) = log(c) + log(e^E~a~(-1/kT)^)
 >log(y) = log(c) + E~a~(-1/kT)
 
 MTE predicts that the temperature dependence of SMR and foraging rates should be constrained between E~a~ = 0.6-0.7. 
