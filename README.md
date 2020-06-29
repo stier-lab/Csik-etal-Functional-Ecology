@@ -53,7 +53,7 @@ The following three files are the primary data used for all analyses. Their meta
 * `date`: date/time of data point collection
 * `temp`: acclimation temperature
 * `lobster_id`: unique lobster identifier
-* `hr`: heart rate (beats min^-1^)
+* `hr`: heart rate (beats min<sup>-1</sup>) 
 * `QI`: Quality index score ranging from 0 (good) to 3 (poor); NOTE: these data have been visually assessed for quality and therefore any hr with a QI = 1-3 was determined to still be an accurate measure.
 
 #### * `data/metabolism/metabolic_traits.csv`
