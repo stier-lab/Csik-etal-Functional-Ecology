@@ -71,7 +71,7 @@ The following three files are the primary data used for all analyses. Their meta
 * `lobster_id`: unique lobster identifier 
 * `Initial`: number of mussels available at the start of the feeding assay
 * `Killed`: number of mussels consumed by the end of the feeding assay
-* `temp`: acclimation tempeature
+* `temp`: acclimation temperature
 
 # Figures
 
