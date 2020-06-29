@@ -60,9 +60,9 @@ The following three files are the primary data used for all analyses. Their meta
 * `temp`: acclimation temperature
 * `ID`: unique lobster identifier
 * `BW`: body weight of lobster (g)
-* `SMR`: standard metabolic rate (mg O~2~ kg^-1^ min^-1^), calculated as the 15th percentile MO~2~ measurement
-* `MMR`: maximum metabolic rate (mg O~2~ kg^-1^ min^-1^), calculated as the fastest rate of linear O~2~ decline over a 60s inverval
-* `AAS`: absolute aerobic scope (mg O~2~ kg^-1^ min^-1^); calculated as MMR-SMR
+* `SMR`: standard metabolic rate (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>), calculated as the 15th percentile MO<sub>2</sub> measurement
+* `MMR`: maximum metabolic rate (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>), calculated as the fastest rate of linear O<sub>2</sub> decline over a 60s inverval
+* `AAS`: absolute aerobic scope (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>); calculated as MMR-SMR
 * `FAS`: factorial aerobic scope (unitless); calculated as MMR/SMR
 
 #### * `data/foraging/raw/foraging_assay_data.csv`
