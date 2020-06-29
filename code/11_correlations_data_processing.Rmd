@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###**Summary**
 
-Combine metabolism and foraing data into the same data frame for correlational analysis and plotting
+Combine metabolism and foraging data into the same data frame for correlational analysis and plotting.
 
 ###**Outline**
 
