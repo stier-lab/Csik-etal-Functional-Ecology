@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###**Summary**
 
+All summary stats, Q~10~ values, etc. found in the text of the manuscript are calculated here.
+
 ###**Outline**
 
 **Part 0** Import packages and data

@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ###**Summary**
+
+To determine how different metabolic traits alter lobster foraging across temperatures, we correlate SMR, MMR, AAS, and FAS with max consumption rates. 
+
 ###**Outline**
 
 **Part 0** Import packages and data
