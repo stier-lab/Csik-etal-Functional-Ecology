@@ -61,7 +61,7 @@ foraging_assays <- read_csv(here::here("data", "foraging", "raw", "foraging_assa
 
 NEW_metabolic_rates <- metabolic_rates %>% 
   dplyr::rename(lobster_id = ID) %>% 
-  select(lobster_id, temp, SMR_low15quant, mmr_overall, AS_SMR_low15quant, FAS_q15) %>% 
+  select(lobster_id, temp, SMR, MMR, AAS, FAS) %>% 
   mutate(temp = as.character(temp)) 
 
 ##############################
@@ -85,5 +85,5 @@ NEW_foraging_assays <- foraging_assays %>%
 
 metabolism_foraging_data <- full_join(NEW_metabolic_rates, NEW_foraging_assays)
 
-# write.csv(metabolism_foraging_data, here::here("data", "correlations", "outputs", "metabolism_foraging_data.csv"))
+# write.csv(metabolism_foraging_data, here::here("data", "correlations", "outputs", "metabolism_foraging_data.csv"), row.names = FALSE)
 ```

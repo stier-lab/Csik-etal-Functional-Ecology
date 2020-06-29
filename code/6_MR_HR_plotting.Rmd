@@ -77,7 +77,7 @@ rhr_sum <- read_csv(here::here("data", "heart_rate", "outputs", "rhr_summary_sta
 ##############################
 
 smr_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = SMR_low15quant), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = SMR), color = "black", width = 0.2, alpha = 0.2, size = 3) +
   geom_errorbar(data = smr_sum, aes(x = as.factor(temp), ymin = SMR_avg - error, ymax = SMR_avg + error), width = 0.1, size = 1, color = "black") +
   geom_point(data = smr_sum, aes(x = as.factor(temp),  y = SMR_avg), size = 6, colour = "black") +
   geom_point(data = smr_sum, aes(x = as.factor(temp),  y = SMR_avg, color = as.factor(temp)), size = 4.5) +
@@ -97,7 +97,7 @@ smr_plot <- ggplot() +
 ##############################
 
 mmr_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = mmr_overall), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = MMR), color = "black", width = 0.2, alpha = 0.2, size = 3) +
   geom_errorbar(data = mmr_sum, aes(x = as.factor(temp), ymin = MMR_avg - error, ymax = MMR_avg + error), width = 0.1, size = 1, color = "black") +
   geom_point(data = mmr_sum, aes(x = as.factor(temp),  y = MMR_avg), size = 6, color = "black") +
   geom_point(data = mmr_sum, aes(x = as.factor(temp),  y = MMR_avg, color = as.factor(temp)), size = 4.5) +
@@ -117,7 +117,7 @@ mmr_plot <- ggplot() +
 ##############################
 
 aas_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = AS_SMR_low15quant), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = AAS), color = "black", width = 0.2, alpha = 0.2, size = 3) +
   geom_errorbar(data = aas_sum, aes(x = as.factor(temp), ymin = AS_avg - error, ymax = AS_avg + error), width = 0.1, size = 1, color = "black") +
   geom_point(data = aas_sum, aes(x = as.factor(temp),  y = AS_avg), size = 6, color = "black") +
   geom_point(data = aas_sum, aes(x = as.factor(temp),  y = AS_avg, color = as.factor(temp)), size = 4.5) +
@@ -137,7 +137,7 @@ aas_plot <- ggplot() +
 ##############################
 
 fas_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = FAS_q15), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = as.factor(temp), y = FAS), color = "black", width = 0.2, alpha = 0.2, size = 3) +
   geom_errorbar(data = fas_sum, aes(x = as.factor(temp), ymin = FAS_avg - error, ymax = FAS_avg + error), width = 0.1, size = 1, color = "black") +
   geom_point(data = fas_sum, aes(x = as.factor(temp),  y = FAS_avg), size = 6, color = "black") +
   geom_point(data = fas_sum, aes(x = as.factor(temp),  y = FAS_avg, color = as.factor(temp)), size = 4.5) +

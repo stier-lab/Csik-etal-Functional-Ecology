@@ -55,11 +55,11 @@ metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.c
 ##############################
 
 # linear model
-smr_lm_mod <- lm(formula = SMR_low15quant ~ temp, data = metabolic_rates)
+smr_lm_mod <- lm(formula = SMR ~ temp, data = metabolic_rates)
 summary(smr_lm_mod)
 
 # exponential model
-smr_exponential_mod <- lm(log(metabolic_rates$SMR_low15quant) ~ log(metabolic_rates$temp))
+smr_exponential_mod <- lm(log(metabolic_rates$SMR) ~ log(metabolic_rates$temp))
 summary(smr_exponential_mod)
 
 ##############################
@@ -86,12 +86,12 @@ tab_model(smr_lm_mod, smr_exponential_mod,
 ##############################
 
 # linear model
-mmr_lm_mod <- lm(formula = mmr_overall ~ temp, data = metabolic_rates)
+mmr_lm_mod <- lm(formula = MMR ~ temp, data = metabolic_rates)
 summary(mmr_lm_mod)
 
 # quadratic model
 temp2 <- metabolic_rates$temp^2 # temp squared
-mmr_quadratic_mod <- lm(mmr_overall ~ temp + temp2, data = metabolic_rates)
+mmr_quadratic_mod <- lm(MMR ~ temp + temp2, data = metabolic_rates)
 summary(mmr_quadratic_mod)
 
 ##############################
@@ -118,19 +118,19 @@ tab_model(mmr_lm_mod, mmr_quadratic_mod,
 ##############################
 
 # linear model
-as_lm_mod <- lm(formula = AS_SMR_low15quant ~ temp, data = metabolic_rates)
-summary(as_lm_mod)
+aas_lm_mod <- lm(formula = AAS ~ temp, data = metabolic_rates)
+summary(aas_lm_mod)
 
 # quadratic model
 temp2 <- metabolic_rates$temp^2 # temp squared
-as_quadratic_mod <- lm(AS_SMR_low15quant ~ temp + temp2, data = metabolic_rates)
-summary(as_quadratic_mod)
+aas_quadratic_mod <- lm(AAS ~ temp + temp2, data = metabolic_rates)
+summary(aas_quadratic_mod)
 
 ##############################
 # create table (manually edit aesthetics in Word)
 ##############################
 
-tab_model(as_lm_mod, as_quadratic_mod,
+tab_model(aas_lm_mod, aas_quadratic_mod,
           dv.labels = c("Linear", "Quadratic"),
           pred.labels = c(`(Intercept)` = "Intercept",
                           temp = "Temperature (°C)",

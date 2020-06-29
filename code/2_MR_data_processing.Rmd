@@ -80,12 +80,12 @@ metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.c
 ##############################
 
 mr_no_mass <- metabolic_rates %>% 
-  mutate(SMR = BW * SMR_low15quant,
-         MMR = BW * mmr_overall,
-         AS = BW * AS_SMR_low15quant) %>% 
-  select(ID, temp, BW, SMR, MMR, AS) %>% 
-  gather(SMR, MMR, AS, key = trait, value = mr_no_mass) %>% 
-  mutate(trait = fct_relevel(trait, "SMR", "MMR", "AS"),
+  mutate(SMR = BW * SMR,
+         MMR = BW * MMR,
+         AS = BW * AAS) %>% 
+  select(ID, temp, BW, SMR, MMR, AAS) %>% 
+  gather(SMR, MMR, AAS, key = trait, value = mr_no_mass) %>% 
+  mutate(trait = fct_relevel(trait, "SMR", "MMR", "AAS"),
          temp = fct_relevel(as.factor(temp), "11", "16", "21", "26"))
 
 ##############################
@@ -117,13 +117,13 @@ SMR_summary <- metabolic_rates %>%
   mutate(temp = as.factor(temp)) %>% 
   dplyr::group_by(temp) %>% 
   dplyr::summarise(
-    SMR_avg = round(mean(SMR_low15quant, na.rm = T),3),
-    SMR_sd = round(sd(SMR_low15quant, na.rm = T),3),
-    SMR_se = round(SMR_sd/sqrt(length(SMR_low15quant)),3),
+    SMR_avg = round(mean(SMR, na.rm = T),3),
+    SMR_sd = round(sd(SMR, na.rm = T),3),
+    SMR_se = round(SMR_sd/sqrt(length(SMR)),3),
     SMR_cv = SMR_sd/SMR_avg,
-    SMR_min = round(min(SMR_low15quant),3),
-    SMR_max = round(max(SMR_low15quant),3),
-    error = qnorm(0.975) * sd(SMR_low15quant)/sqrt(length(SMR_low15quant)),
+    SMR_min = round(min(SMR),3),
+    SMR_max = round(max(SMR),3),
+    error = qnorm(0.975) * sd(SMR)/sqrt(length(SMR)),
     upper_95ci = SMR_avg + error,
     lower_95ci = SMR_avg - error)
 
@@ -137,13 +137,13 @@ MMR_summary <- metabolic_rates %>%
   mutate(temp = as.factor(temp)) %>% 
   dplyr::group_by(temp) %>% 
   dplyr::summarize(
-    MMR_avg = round(mean(mmr_overall, na.rm = T), 3),
-    MMR_sd = round(sd(mmr_overall, na.rm = T),3),
-    MMR_se = round(MMR_sd/sqrt(length(mmr_overall)),3),
+    MMR_avg = round(mean(MMR, na.rm = T), 3),
+    MMR_sd = round(sd(MMR, na.rm = T),3),
+    MMR_se = round(MMR_sd/sqrt(length(MMR)),3),
     MMR_cv =  MMR_sd/MMR_avg,
-    MMR_min = round(min(mmr_overall),3),
-    MMR_max = round(max(mmr_overall),3),
-    error = qnorm(0.975) * sd(mmr_overall)/sqrt(length(mmr_overall)),
+    MMR_min = round(min(MMR),3),
+    MMR_max = round(max(MMR),3),
+    error = qnorm(0.975) * sd(MMR)/sqrt(length(MMR)),
     upper_95ci = MMR_avg + error,
     lower_95ci = MMR_avg - error)
 
@@ -157,13 +157,13 @@ AAS_summary <- metabolic_rates %>%
   mutate(temp = as.factor(temp)) %>% 
   dplyr::group_by(temp) %>% 
   dplyr::summarize(
-    AS_avg = round(mean(AS_SMR_low15quant, na.rm = T),3),
-    AS_sd = round(sd(AS_SMR_low15quant, na.rm = T),3),
-    AS_se = round(AS_sd/sqrt(length(AS_SMR_low15quant)),3),
+    AS_avg = round(mean(AAS, na.rm = T),3),
+    AS_sd = round(sd(AAS, na.rm = T),3),
+    AS_se = round(AS_sd/sqrt(length(AAS)),3),
     AS_cv = AS_sd/AS_avg,
-    AS_min = round(min(AS_SMR_low15quant),3),
-    AS_max = round(max(AS_SMR_low15quant),3),
-    error = qnorm(0.975) * sd(AS_SMR_low15quant)/sqrt(length(AS_SMR_low15quant)), 
+    AS_min = round(min(AAS),3),
+    AS_max = round(max(AAS),3),
+    error = qnorm(0.975) * sd(AAS)/sqrt(length(AAS)), 
     upper_95ci = AS_avg + error,
     lower_95ci = AS_avg - error)
 
@@ -177,13 +177,13 @@ FAS_summary <- metabolic_rates %>%
   mutate(temp = as.factor(temp)) %>% 
   dplyr::group_by(temp) %>% 
   dplyr::summarize(
-    FAS_avg = round(mean(FAS_q15, na.rm = T), 3),
-    FAS_sd = round(sd(FAS_q15, na.rm = T), 3),
-    FAS_se = FAS_sd/sqrt(length(FAS_q15)),
+    FAS_avg = round(mean(FAS, na.rm = T), 3),
+    FAS_sd = round(sd(FAS, na.rm = T), 3),
+    FAS_se = FAS_sd/sqrt(length(FAS)),
     FAS_cv = FAS_sd/FAS_avg,
-    FAS_min = min(FAS_q15),
-    FAS_max = max(FAS_q15),
-    error = qnorm(0.975) * sd(FAS_q15)/sqrt(length(FAS_q15)),
+    FAS_min = min(FAS),
+    FAS_max = max(FAS),
+    error = qnorm(0.975) * sd(FAS)/sqrt(length(FAS)),
     upper_95ci = FAS_avg + error,
     lower_95ci = FAS_avg - error)
 

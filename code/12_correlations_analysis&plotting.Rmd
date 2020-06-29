@@ -62,20 +62,20 @@ metabolism_foraging_data <- read_csv(here::here("data", "correlations", "outputs
   # NA = data are not normal
 ##############################
 
-shapiro.test(metabolism_foraging_data$SMR_low15quant) # p = 0.1281
-shapiro.test(metabolism_foraging_data$mmr_overall) # p = 0.8653
-shapiro.test(metabolism_foraging_data$AS_SMR_low15quant) # p = 0.9025
-shapiro.test(metabolism_foraging_data$FAS_q15) # p = 0.001497* bc of 11C
+shapiro.test(metabolism_foraging_data$SMR) # p = 0.1281
+shapiro.test(metabolism_foraging_data$MMR) # p = 0.8752
+shapiro.test(metabolism_foraging_data$AAS) # p = 0.9025
+shapiro.test(metabolism_foraging_data$FAS) # p = 0.001497* bc of 11C
 shapiro.test(metabolism_foraging_data$avg_eaten) # p = 0.2052
 
 ##############################
 # visual inspection using Q-Q plots
 ##############################
 
-ggqqplot(metabolism_foraging_data$SMR_low15quant, ylab = "SMR") # pretty good
-ggqqplot(metabolism_foraging_data$mmr_overall, ylab = "MMR") # great
-ggqqplot(metabolism_foraging_data$AS_SMR_low15quant, ylab = "AAS") # great
-ggqqplot(metabolism_foraging_data$FAS_q15, ylab = "FAS") # great except for 11C
+ggqqplot(metabolism_foraging_data$SMR, ylab = "SMR") # pretty good
+ggqqplot(metabolism_foraging_data$MMR, ylab = "MMR") # great
+ggqqplot(metabolism_foraging_data$AAS, ylab = "AAS") # great
+ggqqplot(metabolism_foraging_data$FAS, ylab = "FAS") # great except for 11C
 ggqqplot(metabolism_foraging_data$avg_eaten, ylab = "Average Consumption") # ok
 ```
 
@@ -85,7 +85,7 @@ ggqqplot(metabolism_foraging_data$avg_eaten, ylab = "Average Consumption") # ok
 # smr
 ##############################
 
-smr_cor <- cor.test(metabolism_foraging_data$SMR_low15quant, metabolism_foraging_data$avg_eaten, method = c("pearson"))
+smr_cor <- cor.test(metabolism_foraging_data$SMR, metabolism_foraging_data$avg_eaten, method = c("pearson"))
 
 smr_cor_p <- round(smr_cor$p.value, 3)
 smr_cor_est <- round(smr_cor$estimate, 3)
@@ -94,7 +94,7 @@ smr_cor_est <- round(smr_cor$estimate, 3)
 # mmr
 ##############################
 
-mmr_cor <- cor.test(metabolism_foraging_data$mmr_overall, metabolism_foraging_data$avg_eaten, method = c("pearson"))
+mmr_cor <- cor.test(metabolism_foraging_data$MMR, metabolism_foraging_data$avg_eaten, method = c("pearson"))
 
 mmr_cor_p <- round(mmr_cor$p.value, 3)
 mmr_cor_est <- round(mmr_cor$estimate, 3)
@@ -103,7 +103,7 @@ mmr_cor_est <- round(mmr_cor$estimate, 3)
 # aas
 ##############################
 
-aas_cor <- cor.test(metabolism_foraging_data$AS_SMR_low15quant, metabolism_foraging_data$avg_eaten, method = c("pearson"))
+aas_cor <- cor.test(metabolism_foraging_data$AAS, metabolism_foraging_data$avg_eaten, method = c("pearson"))
 
 aas_cor_p <- round(aas_cor$p.value, 3)
 aas_cor_est <- round(aas_cor$estimate, 3)
@@ -112,7 +112,7 @@ aas_cor_est <- round(aas_cor$estimate, 3)
 # fas
 ##############################
 
-fas_cor <- cor.test(metabolism_foraging_data$FAS_q15, metabolism_foraging_data$avg_eaten, method = c("pearson"))
+fas_cor <- cor.test(metabolism_foraging_data$FAS, metabolism_foraging_data$avg_eaten, method = c("pearson"))
 
 fas_cor_p <- round(fas_cor$p.value, 3)
 fas_cor_est <- round(fas_cor$estimate, 3)
@@ -133,7 +133,7 @@ correlation_table <- data.frame("Metabolic Trait" = c("SMR", "MMR", "AAS", "FAS"
                                 "R2" = c(smr_cor_est^2, mmr_cor_est^2, aas_cor_est^2, fas_cor_est^2),
                                 "p-value" = c(smr_cor_p, mmr_cor_p, aas_cor_p, fas_cor_p))
 
-# write.csv(correlation_table, here::here("data", "correlations", "outputs", "correlations.csv"))
+# write.csv(correlation_table, here::here("data", "correlations", "outputs", "correlations.csv"), row.names = FALSE)
 ```
 
 ####**Part 4.** Create correlation matrix plot (Fig S4)
@@ -144,8 +144,8 @@ correlation_table <- data.frame("Metabolic Trait" = c("SMR", "MMR", "AAS", "FAS"
 
 # rename variables in metabolism_foraging_data for ease of viewing
 NEW_metabolism_foraging_data <- metabolism_foraging_data %>% 
-  select(SMR_low15quant, mmr_overall, AS_SMR_low15quant, FAS_q15, avg_eaten) %>% 
-  rename(SMR = SMR_low15quant, MMR = mmr_overall, AAS = AS_SMR_low15quant, FAS = FAS_q15, `Average Consumed` = avg_eaten)
+  select(SMR, MMR, AAS, FAS, avg_eaten) %>% 
+  rename(`Average Consumed` = avg_eaten)
 
 ##############################
 # calculate pairwise Pearson's r for correlations
@@ -172,7 +172,7 @@ corr_matrix <- corrplot(corr_df,
 # smr
 ##############################
 
-smr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = SMR_low15quant, y = avg_eaten)) + 
+smr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = SMR, y = avg_eaten)) + 
   geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.02, color = "lightgray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
@@ -207,7 +207,7 @@ smr_marg <- ggMarginal(smr_corr_plot, type = "density", size = 4, groupColour = 
 # mmr
 ##############################
 
-mmr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = mmr_overall, y = avg_eaten)) + 
+mmr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = MMR, y = avg_eaten)) + 
   geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "lightgray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
@@ -241,7 +241,7 @@ mmr_marg <- ggMarginal(mmr_corr_plot, type = "density", size = 4, groupColour = 
 # aas
 ##############################
 
-aas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = AS_SMR_low15quant, y = avg_eaten)) + 
+aas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = AAS, y = avg_eaten)) + 
   geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "lightgray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
@@ -272,7 +272,7 @@ aas_marg <- ggMarginal(aas_corr_plot, type = "density", size = 4, groupColour = 
 # fas
 ##############################
 
-fas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = mmr_overall/SMR_low15quant, y = avg_eaten)) + 
+fas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = FAS, y = avg_eaten)) + 
   geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.3, color = "lightgray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
@@ -306,7 +306,7 @@ fas_marg <- ggMarginal(fas_corr_plot, type = "density", size = 4, groupColour = 
 # combine plots and print
 ##############################
 
-correlations_plot <- cowplot::plot_grid(smr_marg, mmr_marg, aas_marg, fas_marg, nrow = 2, labels = "AUTO", axis = "tblr", rel_widths = c(0.85, 0.85, 0.85, 0.85))
+correlations_plot <- cowplot::plot_grid(smr_marg, mmr_marg, aas_marg, fas_marg, nrow = 2, labels = "AUTO", axis = "tblr", rel_widths = c(0.95, 0.80, 0.95, 0.80))
 
 # cowplot::save_plot(here::here("figures", "main_text", "Fig5.pdf"), correlations_plot, base_width = 10, base_height = 10)
 

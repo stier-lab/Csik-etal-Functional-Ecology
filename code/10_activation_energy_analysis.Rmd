@@ -122,21 +122,21 @@ Ea_h <- Ea_functional_response_params %>% filter(parameter == "h")
 # smr 
 ##############################
 
-Ea_smr_mod <- lm(log(SMR_low15quant) ~ Arrhenius_temp, Ea_metabolic_rates)
+Ea_smr_mod <- lm(log(SMR) ~ Arrhenius_temp, Ea_metabolic_rates)
 summary(Ea_smr_mod)
 
 ##############################
 # mmr
 ##############################
 
-Ea_mmr_mod <- lm(log(mmr_overall) ~ Arrhenius_temp, Ea_metabolic_rates)
+Ea_mmr_mod <- lm(log(MMR) ~ Arrhenius_temp, Ea_metabolic_rates)
 summary(Ea_mmr_mod)
 
 ##############################
 # aas
 ##############################
 
-Ea_aas_mod <- lm(log(AS_SMR_low15quant) ~ Arrhenius_temp, Ea_metabolic_rates)
+Ea_aas_mod <- lm(log(AAS) ~ Arrhenius_temp, Ea_metabolic_rates)
 summary(Ea_aas_mod)
 
 ##############################
@@ -167,7 +167,7 @@ summary(Ea_h_mod)
 # smr 
 ##############################
 
-Ea_smr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(SMR_low15quant))) +
+Ea_smr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(SMR))) +
   geom_point(aes(color = as.factor(temp), shape = as.factor(temp), size = as.factor(temp)), alpha = 0.8, name = "Temperature (°C)") +
   scale_shape_manual(values = c(16, 17, 18), name = "Temperature (°C)") +
   scale_size_manual(values = c(4, 4, 5), name = "Temperature (°C)") +
@@ -185,7 +185,7 @@ Ea_smr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(SMR_lo
 # mmr
 ##############################
 
-Ea_mmr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(mmr_overall))) +
+Ea_mmr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(MMR))) +
   geom_point(aes(color = as.factor(temp), shape = as.factor(temp), size = as.factor(temp)), alpha = 0.8, name = "Temperature (°C)") +
   scale_shape_manual(values = c(16, 17, 18), name = "Temperature (°C)") +
   scale_size_manual(values = c(4, 4, 5), name = "Temperature (°C)") +
@@ -203,7 +203,7 @@ Ea_mmr_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(mmr_ov
 # aas
 ##############################
 
-Ea_aas_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(AS_SMR_low15quant))) +
+Ea_aas_plot <- ggplot(Ea_metabolic_rates, aes(x = Arrhenius_temp, y = log(AAS))) +
   geom_point(aes(color = as.factor(temp), shape = as.factor(temp), size = as.factor(temp)), alpha = 0.8, name = "Temperature (°C)") +
   scale_shape_manual(values = c(16, 17, 18), name = "Temperature (°C)") +
   scale_size_manual(values = c(4, 4, 5), name = "Temperature (°C)") +
