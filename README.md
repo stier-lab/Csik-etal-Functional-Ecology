@@ -1,6 +1,6 @@
 # Csik-etal-Functional-Ecology
 
-This repository contains the code and data for reproducing Csik *et al.* **YEAR** (to be submitted to Functional Ecology): **"TITLE HERE"** (**URL HERE**)
+This repository contains the code and data for reproducing Csik *et al.* **in prep** (to be submitted to Functional Ecology): **"TITLE HERE"** (**URL HERE**)
 
 The DOI for this code and data repository is managed through Dryad with DOI number **NUMBER HERE** (**LINK HERE**).
 
@@ -71,7 +71,7 @@ The following three files are the primary data used for all analyses. Their meta
 * `lobster_id`: unique lobster identifier 
 * `Initial`: number of mussels available at the start of the feeding assay
 * `Killed`: number of mussels consumed by the end of the feeding assay
-* `temp`: acclimation tempeature
+* `temp`: acclimation temperature
 
 # Figures
 
