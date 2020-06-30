@@ -299,9 +299,9 @@ fas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = FAS, y = avg_eaten)) +
   annotate(geom = "curve", x = 17.5, y = 19, xend = 18.22, yend = 9.44,
            curature = 0.5, arrow = arrow(length = unit(3, "mm"))) +
   annotate(geom = "text", x = 17.53, y = 19.1, label = "IV10", hjust = "left") +
-  annotate(geom = "curve", x = 3.8, y = 4.45, xend = 3.2, yend = 14.0,
+  annotate(geom = "curve", x = 3.9, y = 4.45, xend = 3.2, yend = 14.0, 
            curvature = 0.2, arrow = arrow(length = unit(3, "mm"))) +
-  annotate(geom = "text", x = 3.75, y = 4.4, label = "IV19", hjust = "right")
+  annotate(geom = "text", x = 3.85, y = 4.4, label = "IV19", hjust = "right") 
 
 fas_marg <- ggMarginal(fas_corr_plot, type = "density", size = 4, groupColour = TRUE, groupFill = TRUE)
 
@@ -311,6 +311,6 @@ fas_marg <- ggMarginal(fas_corr_plot, type = "density", size = 4, groupColour = 
 
 correlations_plot <- cowplot::plot_grid(smr_marg, mmr_marg, aas_marg, fas_marg, nrow = 2, labels = "AUTO", axis = "tblr", rel_widths = c(0.95, 0.80, 0.95, 0.80))
 
-# cowplot::save_plot(here::here("figures", "main_text", "Fig5.pdf"), correlations_plot, base_width = 10, base_height = 10)
+cowplot::save_plot(here::here("figures", "main_text", "Fig5.pdf"), correlations_plot, base_width = 10, base_height = 10)
 
 ```
