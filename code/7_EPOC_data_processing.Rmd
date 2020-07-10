@@ -1,0 +1,421 @@
+---
+title: "EPOC Data Processing"
+author: "Sam Csik"
+date: "7/6/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+EPOC definition
+Spar
+How EPOC is calculated
+
+###**Outline**
+
+**Part 0.** Import libraries and data
+**Part 1.** Calculate treatment-level summary stats (will eventually be used for plotting)
+
+###**Packages Required:** 
+
+    - tidyverse
+    - here
+
+###**Data Required:**
+
+**(file path: data/metabolism)**
+
+    - epoc.csv
+
+####**Part 0.** Import packages and data  
+```{r}
+##############################
+# import libraries
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+epoc <- read_csv(here::here("data", "metabolism", "epoc.csv"))
+```
+
+####**Part 1.** Wrangle hourly EPOC for each treatment
+```{r}
+##############################
+# hourly epoc summary
+##############################
+
+EPOC_hourly_summary <- epoc %>% 
+  filter(spar == 0.2) %>% 
+  select(ID, temp, EPOC_1hr, EPOC_2hr, EPOC_3hr, EPOC_4hr, EPOC_5hr) %>% 
+  mutate(`0-1` = EPOC_1hr, # currently cumulative; need to subtract 
+         `1-2` = EPOC_2hr - EPOC_1hr,
+         `2-3` = EPOC_3hr - EPOC_2hr,
+         `3-4` = EPOC_4hr - EPOC_3hr,
+         `4-5` = EPOC_5hr - EPOC_4hr) %>% 
+  select(ID, temp, `0-1`, `1-2`, `2-3`, `3-4`, `4-5`) %>% 
+  mutate(temp = as.factor(temp)) %>% 
+  group_by(temp) %>% 
+  summarize(
+    #### averages ####
+    avg01 = round(mean(`0-1`), 3),
+    avg12 = round(mean(`1-2`), 3),
+    avg23 = round(mean(`2-3`), 3),
+    avg34 = round(mean(`3-4`), 3),
+    avg45 = round(mean(`4-5`), 3),
+    #### standard deviations ####
+    avg01_sd = round(sd(`0-1`, na.rm = T), 3),
+    avg12_sd = round(sd(`1-2`, na.rm = T), 3),
+    avg23_sd = round(sd(`2-3`, na.rm = T), 3),
+    avg34_sd = round(sd(`3-4`, na.rm = T), 3),
+    avg45_sd = round(sd(`4-5`, na.rm = T), 3),
+    #### standard error ####
+    avg01_se = avg01_sd/sqrt(length(avg01)),
+    avg12_se = avg12_sd/sqrt(length(avg12)),
+    avg23_se = avg23_sd/sqrt(length(avg23)),
+    avg34_se = avg34_sd/sqrt(length(avg34)),
+    avg45_se = avg45_sd/sqrt(length(avg45)),
+    #### error ####
+    avg01_error = qnorm(0.975) * sd(`0-1`)/sqrt(length(`0-1`)),
+    avg12_error = qnorm(0.975) * sd(`1-2`)/sqrt(length(`1-2`)),
+    avg23_error = qnorm(0.975) * sd(`2-3`)/sqrt(length(`2-3`)),
+    avg34_error = qnorm(0.975) * sd(`3-4`)/sqrt(length(`3-4`)),
+    avg45_error = qnorm(0.975) * sd(`4-5`)/sqrt(length(`4-5`)),
+    #### uppper ci ####
+    upper_95ci_01 = avg01 + avg01_error,
+    upper_95ci_12 = avg12 + avg12_error,
+    upper_95ci_23 = avg23 + avg23_error,
+    upper_95ci_34 = avg34 + avg34_error,
+    upper_95ci_45 = avg45 + avg45_error,
+    #### lower ci ####
+    lower_95ci_01 = avg01 + avg01_error,
+    lower_95ci_12 = avg12 + avg12_error,
+    lower_95ci_23 = avg23 + avg23_error,
+    lower_95ci_34 = avg34 + avg34_error,
+    lower_95ci_45 = avg45 + avg45_error)
+
+##############################
+# convert each summary stat to long format and combine into single df
+##############################
+
+EPOC_treatment_averages <- EPOC_hourly_summary %>% 
+  select(temp, avg01, avg12, avg23, avg34, avg45) %>% 
+  pivot_longer(cols = c(avg01, avg12, avg23, avg34, avg45), names_to = "hour_label1", values_to = "mean")
+
+EPOC_treatment_sd <- EPOC_hourly_summary %>% 
+  select(avg01_sd, avg12_sd, avg23_sd, avg34_sd, avg45_sd) %>% 
+  pivot_longer(cols = c(avg01_sd, avg12_sd, avg23_sd, avg34_sd, avg45_sd), names_to = "hour_label2", values_to = "sd")
+
+EPOC_treatment_se <- EPOC_hourly_summary %>% 
+  select(avg01_se, avg12_se, avg23_se, avg34_se, avg45_se) %>% 
+  pivot_longer(cols = c(avg01_se, avg12_se, avg23_se, avg34_se, avg45_se), names_to = "hour_label3", values_to = "se")
+
+EPOC_treatment_upperci <- EPOC_hourly_summary %>% 
+  select(upper_95ci_01, upper_95ci_12, upper_95ci_23, upper_95ci_34, upper_95ci_45) %>% 
+  pivot_longer(cols = c(upper_95ci_01, upper_95ci_12, upper_95ci_23, upper_95ci_34, upper_95ci_45), names_to = "hour_label4", values_to = "upper_95ci")
+
+EPOC_treatment_lowerci <- EPOC_hourly_summary %>% 
+  select(lower_95ci_01, lower_95ci_12, lower_95ci_23, lower_95ci_34, lower_95ci_45) %>% 
+  pivot_longer(cols = c(lower_95ci_01, lower_95ci_12, lower_95ci_23, lower_95ci_34, lower_95ci_45), names_to = "hour_label5", values_to = "lower_95ci")
+
+##############################
+# combine dfs
+##############################
+
+EPOC_hourly_wrangled <- cbind(EPOC_treatment_averages, EPOC_treatment_sd, 
+                              EPOC_treatment_se, EPOC_treatment_lowerci, 
+                              EPOC_treatment_upperci) %>% 
+  select(temp, hour_label1, mean, sd, se, lower_95ci, upper_95ci) %>% 
+  mutate(
+    hour = case_when(
+      hour_label1 == "avg01" ~ "0-1",
+      hour_label1 == "avg12" ~ "1-2",
+      hour_label1 == "avg23" ~ "2-3",
+      hour_label1 == "avg34" ~ "3-4",
+      hour_label1 == "avg45" ~ "4-5"
+    )
+  )
+
+# write.csv(EPOC_hourly_wrangled, here::here("data", "metabolism", "outputs", "epoc_summary_stats.csv"), row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# average MO2 for each hour (1-5 hours post exercise) by temperature
+MO2_summary <- epoc %>% 
+  filter(spar == 0.2) %>% 
+  select(ID, temp, MO2_1hr, MO2_2hr, MO2_3hr, MO2_4hr, MO2_5hr) %>% 
+  pivot_longer(cols = c(MO2_1hr, MO2_2hr, MO2_3hr, MO2_4hr, MO2_5hr), 
+               names_to = "MO2_hour", values_to = "MO2") %>% 
+  # mutate(
+  #   hour = case_when(
+  #     MO2_hour == "MO2_1hr" ~ "1",
+  #     MO2_hour == "MO2_2hr" ~ "2",
+  #     MO2_hour == "MO2_3hr" ~ "3",
+  #     MO2_hour == "MO2_4hr" ~ "4",
+  #     MO2_hour == "MO2_5hr" ~ "5"
+  #   )
+  # ) %>% 
+  group_by(temp, MO2_hour) %>% 
+  summarize(
+    MO2_avg = mean(MO2)
+  )
+
+# average total EPOC by temperature
+EPOC_full_summary <- epoc %>% 
+  filter(spar == 0.2) %>% 
+  select(ID, temp, EPOC_full) %>% 
+  group_by(temp) %>% 
+  summarize(
+    EPOC_full_avg = round(mean(EPOC_full, na.rm = T), 3),
+    EPOC_full_sd = round(sd(EPOC_full, na.rm = T), 3),
+    EPOC_full_se = EPOC_full_sd/sqrt(length(EPOC_full)),
+    EPOC_full_cv = EPOC_full_sd/EPOC_full_avg,
+    EPOC_full_min = min(EPOC_full),
+    EPOC_full_max = max(EPOC_full),
+    error = qnorm(0.975) * sd(EPOC_full)/sqrt(length(EPOC_full)),
+    upper_95ci = EPOC_full_avg + error,
+    lower_95ci = EPOC_full_avg - error
+  )
+
+
+
+
+
+
+  # pivot_longer(cols = c(EPOC_1hr, EPOC_2hr, EPOC_3hr, EPOC_4hr, EPOC_5hr), 
+  #              names_to = "EPOC_hour", values_to = "EPOC") %>% 
+  # mutate(
+  #   hour = case_when(
+  #     EPOC_hour == "EPOC_1hr" ~ "1",
+  #     EPOC_hour == "EPOC_2hr" ~ "2",
+  #     EPOC_hour == "EPOC_3hr" ~ "3",
+  #     EPOC_hour == "EPOC_4hr" ~ "4",
+  #     EPOC_hour == "EPOC_5hr" ~ "5"
+  #   )
+  # ) %>% 
+  # group_by(temp, hour) %>% 
+  # summarize(
+  #   EPOC_hr_avg = round(mean(EPOC, na.rm = T), 3),
+  #   EPOC_hr_sd = round(sd(EPOC, na.rm = T), 3),
+  #   EPOC_hr_se = EPOC_hr_sd/sqrt(length(EPOC)),
+  #   EPOC_hr_cv = EPOC_hr_sd/EPOC_hr_avg,
+  #   EPOC_hr_min = min(EPOC),
+  #   EPOC_hr_max = max(EPOC),
+  #   error = qnorm(0.975) * sd(EPOC)/sqrt(length(EPOC)),
+  #   upper_95ci = EPOC_hr_avg + error,
+  #   lower_95ci = EPOC_hr_avg - error
+  # )
+  # 
+```
+
+####**Part 2.** Total EPOC
+```{r}
+
+```
+
+####**Part 2.** MO2 as %MMR over time
+
+####**Part 3.**
+```{r}
+##############################
+# hourly epoc summary
+##############################
+
+EPOC_hourly_long <- epoc %>% 
+  filter(spar == 0.2) %>% 
+  select(ID, temp, EPOC_1hr, EPOC_2hr, EPOC_3hr, EPOC_4hr, EPOC_5hr) %>% 
+  mutate(`0-1` = EPOC_1hr,
+         `1-2` = EPOC_2hr - EPOC_1hr,
+         `2-3` = EPOC_3hr - EPOC_2hr,
+         `3-4` = EPOC_4hr - EPOC_3hr,
+         `4-5` = EPOC_5hr - EPOC_4hr) %>% 
+  select(ID, temp, `0-1`, `1-2`, `2-3`, `3-4`, `4-5`) %>% 
+  pivot_longer(cols = c(`0-1`, `1-2`, `2-3`, `3-4`, `4-5`), names_to = "hour", values_to = "EPOC") %>% 
+  mutate(temp = as.factor(temp))
+
+##############################
+# plot
+##############################
+
+ggplot(data = EPOC_hourly_long, aes(x = hour, y = EPOC, color = temp, shape = temp, group = ID)) +
+  geom_line(alpha = 0.8) +
+  geom_point(aes(size = temp), alpha = 0.5) +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
+  scale_size_manual(values = c(4, 4, 4, 5), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
+  xlab("Time post-exercise (h)") +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = c(0.99, 0.99),
+        legend.justification = c("right", "top"),
+        legend.background = element_blank(),
+        legend.box.just = "right",
+        legend.title.align = 0.5)
+```
+
+####**Part 1.** Data wrangling
+```{r}
+##############################
+# use spar = 0.2; calculate %MMR for each MO2_hr; select relevant vars; convert wide to long; add col with hour numbers (for plotting) 
+##############################
+
+epoc_new <- epoc %>% 
+  mutate(temp = as.factor(temp)) %>% 
+  filter(spar == "0.2") %>% 
+  mutate(perc_mmr_1hr = (MO2_1hr/MMR) * 100,
+         perc_mmr_2hr = (MO2_2hr/MMR) * 100, 
+         perc_mmr_3hr = (MO2_3hr/MMR) * 100,
+         perc_mmr_4hr = (MO2_4hr/MMR) * 100,
+         perc_mmr_5hr = (MO2_5hr/MMR) * 100) %>% 
+  select(ID, temp, smr, SMR_threshold, MMR, 
+         perc_mmr_1hr, perc_mmr_2hr, perc_mmr_3hr, perc_mmr_4hr, perc_mmr_5hr) %>% 
+  pivot_longer(cols = c(perc_mmr_1hr, perc_mmr_2hr, perc_mmr_3hr, perc_mmr_4hr, perc_mmr_5hr),
+               names_to = "percent_MMR", values_to = "value") %>% 
+  mutate(
+    hour = case_when(
+      percent_MMR == "perc_mmr_1hr" ~ "1",
+      percent_MMR == "perc_mmr_2hr" ~ "2",
+      percent_MMR == "perc_mmr_3hr" ~ "3",
+      percent_MMR == "perc_mmr_4hr" ~ "4",
+      percent_MMR == "perc_mmr_5hr" ~ "5"
+    )
+  ) %>% 
+  mutate(hour = as.numeric(hour))
+
+##############################
+# calculate summary stats for plotting averages
+##############################
+
+recovery_summary <- epoc_new %>% 
+  dplyr::group_by(temp, percent_MMR) %>% 
+  dplyr::summarize(
+    RECOV_avg = mean(value, na.rm = T),
+    RECOV_sd = sd(value, na.rm = T),
+    RECOV_se = RECOV_sd/sqrt(length(value)),
+    RECOV_cv = RECOV_sd/RECOV_avg,
+    error = qnorm(0.975) * sd(value)/sqrt(length(value)),
+    upper_95ci = RECOV_avg + error,
+    lower_95ci = RECOV_avg - error) #%>% 
+  # mutate(
+  #   hour = case_when(
+  #     percent_MMR == "perc_mmr_1hr" ~ "1",
+  #     percent_MMR == "perc_mmr_2hr" ~ "2",
+  #     percent_MMR == "perc_mmr_3hr" ~ "3",
+  #     percent_MMR == "perc_mmr_4hr" ~ "4",
+  #     percent_MMR == "perc_mmr_5hr" ~ "5"
+  #   )
+  # )
+
+recovery_new <- recovery_summary %>% 
+  mutate(
+    hour = case_when(
+      percent_MMR == "perc_mmr_1hr" ~ "1",
+      percent_MMR == "perc_mmr_2hr" ~ "2",
+      percent_MMR == "perc_mmr_3hr" ~ "3",
+      percent_MMR == "perc_mmr_4hr" ~ "4",
+      percent_MMR == "perc_mmr_5hr" ~ "5"
+    )
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####**Part 2.** Plot
+```{r}
+ggplot() + 
+  #geom_point(recovery_new, mapping = aes(x = hour, y = RECOV_avg, color = temp, shape = temp)) +
+   geom_line(alpha=0.8, colour="#2C67A8", size = 0.75) +
+  geom_point(data = recovery_new, aes(x = hour,  y = RECOV_avg, color = temp, shape = temp)) +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Temperature (°C)") +
+  #scale_size_manual(values = c(10, 4, 4, 5)) +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"),  name = "Temperature (°C)") +
+  xlab("Time post-exercise (hours)") + 							
+  ylab(expression("%MMR"[time~0]))  +
+  geom_segment(x = -1, xend = 7, y = 8.09488, yend = 8.09488, linetype = 2, alpha = 0.5) + 
+  geom_text(aes(7, 8.09488, label = "SMR  11", vjust = 0.5)) + 
+  geom_segment(x = -1, xend = 7, y = 15.4, yend = 15.4, linetype = 4, alpha = 0.5)+ 
+  geom_text(aes(59, 15.4,label = "RMR 14", vjust = 0.5))+ 
+  geom_segment(x = -1, xend = 7, y = 21.2, yend = 21.2, linetype = 3, alpha = 0.5)+ 
+  geom_text(aes(59, 21.2,label = "RMR 18", vjust = 0.5))+ 
+  # geom_hline(yintercept = 8.09488, linetype = 5) +
+  # geom_hline(yintercept = 10.05134, linetype = 2) +
+  # geom_hline(yintercept = 15.24180, linetype = 3) +
+  # geom_hline(yintercept = 21.87057, linetype = 4) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12))
+  
+```
+
+
