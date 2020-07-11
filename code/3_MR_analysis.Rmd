@@ -46,6 +46,11 @@ source(here::here("code", "0_libraries.R"))
 
 metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv")) %>% 
   mutate(temp = as.numeric(as.character(temp)))
+
+# epoc <- read_csv(here::here("data", "metabolism", "epoc.csv"))
+# 
+# epoc_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_summary_stats.csv")) %>% 
+#   mutate(temp = as.factor(temp))
 ```
 
 ####**Part 1.** Fit linear and exponential models to *SMR* data; create table for supplement
@@ -142,3 +147,55 @@ tab_model(aas_lm_mod, aas_quadratic_mod,
           string.ci = "95% CI",
           show.aic = TRUE)
 ```
+
+####**Part 4.** Plot hourly EPOC (0-5 hrs post MMR) for each temperature
+```{r}
+##############################
+# wrangle EPOC data
+##############################
+
+# epoc_long <- epoc %>% 
+#   gather(EPOC_1hr, EPOC_2hr, EPOC_3hr, EPOC_4hr, EPOC_5hr, key = hour, value = EPOC) %>%
+#   mutate(temp = as.factor(temp)) %>%
+#   mutate(
+#     hour_labels = case_when(
+#       hour == "EPOC_1hr" ~ "1",
+#       hour == "EPOC_2hr" ~ "2",
+#       hour == "EPOC_3hr" ~ "3",
+#       hour == "EPOC_4hr" ~ "4",
+#       hour == "EPOC_5hr" ~ "5"
+#     )
+#   )
+
+##############################
+# plot EPOC over time for each temp
+##############################
+
+# wrangle
+# epoc_sum_new <- epoc_sum %>% 
+#    mutate(
+#     hour_labels = case_when(
+#       hour == "EPOC_1hr" ~ "1",
+#       hour == "EPOC_2hr" ~ "2",
+#       hour == "EPOC_3hr" ~ "3",
+#       hour == "EPOC_4hr" ~ "4",
+#       hour == "EPOC_5hr" ~ "5"
+#     )
+#   )
+
+# plot
+# ggplot() + 
+#   # geom_point(data = epoc_sum_new, aes(x = hour_labels, y = EPOC_avg, color = temp, shape = temp), size = 2) +
+#   geom_line(data = epoc_sum_new, aes(x = hour_labels, y = EPOC_avg, color = temp)) +
+#   scale_color_manual(values=c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+#   labs(y = expression(atop("EPOC", paste("(",mg~O[2]~kg^-1,")"))),
+#        x = expression(paste("Temperature (", degree, "C)"))) +
+#   theme_classic() + 
+#   theme(axis.text = element_text(color = "black", size = 12),
+#         axis.title = element_text(size = 13),
+#         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+#         plot.caption = element_text(size = 10, hjust = 0),
+#         legend.position = "none")
+
+```
+
