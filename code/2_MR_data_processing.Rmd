@@ -57,6 +57,7 @@ For more a more detailed description of our respirometry data analysis, see *Est
 **(file path: data/metabolism)**
 
     - metabolic_traits.csv
+    - epoc.csv
 
 ####**Part 0** Import packages and data
 ```{r}
@@ -64,13 +65,15 @@ For more a more detailed description of our respirometry data analysis, see *Est
 # import libraries
 ##############################
 
-source("code/libraries.R")
+source(here::here("code", "0_libraries.R"))
 
 ##############################
 # load data
 ##############################
 
 metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv"))
+
+epoc <- read_csv(here::here("data", "metabolism", "epoc.csv")) 
 ```
 
 ####**Part 1** Ensure that metabolism does not scale with body size (we selected individuals of similar sizes and therefore should not see strong body size scaling effects) by visually assessing the plot below (should see a cloud of points, rather than any clear trends):
