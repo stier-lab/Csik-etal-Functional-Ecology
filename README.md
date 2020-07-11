@@ -41,7 +41,7 @@ These analyses were performed in R (version 3.6.3).
 
 ### Code 
 
-Code is meant to be run in the order designated by the file name numbers (e.g. `0_libraries.R` should be run first, `13_in_text_summary_stats.Rmd` should be run last). The only exception to this is the `FR_JAGS` series (number 9) -- only `9c_FR_JAGS_plotting.R` needs to be run (both `9a_FR_JAGS_functions.R` and `9b_FR_JAGS_model.R` are sourced into this file and do not need to be opened separately to run analyses).
+Code is meant to be run in the order designated by the file name numbers (e.g. `0_libraries.R` should be run first, `15_in_text_summary_stats.Rmd` should be run last). The only exception to this is the `FR_JAGS` series (number 11) -- only `11c_FR_JAGS_plotting.R` needs to be run (both `11a_FR_JAGS_functions.R` and `11b_FR_JAGS_model.R` are sourced into this file and do not need to be opened separately to run analyses).
 
 At the start of each script and RMarkdown file, you will find a brief **summary** of the analyses to follow, an **outline** of code chunks/subsections, any **required packages**, and **required data** (along with their file paths for ease of locating).
 
@@ -64,6 +64,22 @@ The following three files are the primary data used for all analyses. Their meta
 * `MMR`: maximum metabolic rate (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>), calculated as the fastest rate of linear O<sub>2</sub> decline over a 60s inverval
 * `AAS`: absolute aerobic scope (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>); calculated as MMR-SMR
 * `FAS`: factorial aerobic scope (unitless); calculated as MMR/SMR
+
+#### * `data/metabolism/epoc.csv`
+* `temp`: acclimation temperature
+* `ID` : unique lobster identifier
+* `spar` : the smoothing level applied to the recovery profile (see function [`smooth.spline`](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/smooth.spline) parameters)
+* `EPOC_full` : total EPOC (i.e. recovery costs; mg O<sub>2</sub> kg<sup>-1</sup>); represents the integrated area under the smoothed line at a particular spar
+* `end_EPOC_min` : total recovery time (min); the time it takes for for the oxygen consumption rate (MO<sub>2</sub>; the smoothed line) to reach SMR
+* `SMR` : standard metabolic rate (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>), calculated as the 15th percentile MO<sub>2</sub> measurement
+* `SMR_integrated_full` : cost of SMR (area integrated from SMR to 0 mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>)
+* `SMR_threshold` : the value used to calculate EPOC; here, we consider an individual recovered when oxygen consumption rates fall within 20% of SMR
+* `EPOC_1hr` : EPOC from the start of the measurement (i.e. MMR) until 1 hr post exercise (up to EPOC_5hr; units = mg O<sub>2</sub> kg<sup>-1</sup>)
+* `MO2_1hr` : oxygen consumption rate (mg O<sub>2</sub> min<sup>-1</sup>) at 1 hour post exercise (i.e. MMR; up to MO2_5hr)
+* `end_EPOC_mmr` : recovery time (min) to reach 50% of MMR
+* `EPOC_mmr` : EPOC at 50% of MMR
+* `MO2_mmr` : the oxygen consumption rate at 50% of MMR
+* `MMR` : maximum metabolic rate (mg O<sub>2</sub> kg<sup>-1</sup> min<sup>-1</sup>), calculated as the fastest rate of linear O<sub>2</sub> decline over a 60s inverval
 
 #### * `data/foraging/raw/foraging_assay_data.csv`
 * `date`: date the foraging asssay began on (each assay ran for 24h)
