@@ -205,10 +205,10 @@ time_to_MMR50_summary <- epoc %>%
   filter(spar == 0.2) %>% 
   group_by(temp) %>% 
   summarize(
-    time_to_MMR50_avg = round(mean(end_EPOC.mmr), 3),
-    time_to_MMR50_sd = round(sd(end_EPOC.mmr, na.rm = T), 3),
-    time_to_MMR50_se = time_to_MMR50_sd/sqrt(length(end_EPOC.mmr)),
-    error = qnorm(0.975) * sd(end_EPOC.mmr)/sqrt(length(end_EPOC.mmr)),
+    time_to_MMR50_avg = round(mean(end_EPOC_mmr), 3),
+    time_to_MMR50_sd = round(sd(end_EPOC_mmr, na.rm = T), 3),
+    time_to_MMR50_se = time_to_MMR50_sd/sqrt(length(end_EPOC_mmr)),
+    error = qnorm(0.975) * sd(end_EPOC_mmr)/sqrt(length(end_EPOC_mmr)),
     time_to_MMR50_upper95 = time_to_MMR50_avg + error,
     time_to_MMR50_lower95 = time_to_MMR50_avg - error
   )
