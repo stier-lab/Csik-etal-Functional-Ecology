@@ -1,0 +1,169 @@
+---
+title: "EPOC Analysis & Plotting"
+author: "Sam Csik"
+date: "7/8/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+###**Outline**
+
+###**Packages Required:**
+
+    - tidyverse
+    - here
+
+###**Data Required:**
+
+**(file path: data/metabolism/outputs)**
+
+    - epoc_summary_stats.csv
+    
+####**Part 0.** Import packages and data  
+```{r}
+##############################
+# import libraries
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+epoc <- read_csv(here::here("data", "metabolism", "epoc.csv")) %>% filter(spar == 0.2)
+
+epoc_full_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_full_summary_stats.csv"))
+
+epoc_hourly_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_hourly_summary_stats.csv")) %>% 
+  mutate(temp = as.factor(temp))
+
+time_to_epoc_sum <- read_csv(here::here("data", "metabolism", "outputs", "time_to_epoc_full_summary_stats.csv"))
+
+epoc_at_MMR50_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_at_MMR50_summary_stats.csv"))
+
+time_to_MMR50_sum <- read_csv(here::here("data", "metabolism", "outputs", "time_to_MMR50_summary_stats.csv"))
+```
+
+####**Part 1.** Plot total EPOC for each temperature (REMOVE IV11??) (CURRENTLY 95% CI)
+```{r}
+##############################
+# plot
+##############################
+
+full_EPOC_plot <- ggplot() +
+  geom_jitter(data = epoc, aes(x = as.factor(temp), y = EPOC_full), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_errorbar(data = epoc_full_sum, aes(x = as.factor(temp), ymin = epoc_full_avg - epoc_full_error, ymax = epoc_full_avg + epoc_full_error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = epoc_full_sum, aes(x = as.factor(temp),  y = epoc_full_avg), size = 6, color = "black") +
+  geom_point(data = epoc_full_sum, aes(x = as.factor(temp),  y = epoc_full_avg, color = as.factor(temp)), size = 4.5) +
+  labs(y = expression("Cumulative EPOC (mg" ~ O[2] ~kg^-1*")"),
+       x = "Temperature (°C)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+```
+
+####**Part 2.** Plot hourly EPOC for each temperature (REMOVE IV11??)
+```{r}
+##############################
+# plot
+##############################
+
+pd = position_dodge(0.4)
+
+hourly_EPOC_plot <- ggplot(epoc_sum, aes(x = hour, y = mean, group = temp, color = temp)) +
+  geom_line(position = pd, alpha = 0.6, size = 1.05) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se, color = temp), width = 0.2, position = pd, alpha = 0.6) +
+  geom_point(data = epoc_sum, aes(x = hour, y = mean, group = temp, color = temp, shape = temp, size = temp), position = pd) +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
+  scale_shape_manual(values = c(15, 16, 17, 18), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
+  scale_size_manual(values = c(4, 4, 4, 5), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
+  labs(x = "Time post-exercise (h)",
+       y = expression("Hourly EPOC (mg" ~ O[2] ~kg^-1*")")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = c(0.99, 0.99),
+        legend.justification = c("right", "top"),
+        legend.background = element_blank(),
+        legend.box.just = "right",
+        legend.title.align = 0.5)
+
+# cowplot::save_plot(here::here("figures","supplemental", "FigS?.pdf"), hourly_EPOC_plot, base_width = 6, base_height = 5)
+```
+
+####**Part 3.** Plot time to EPOC for each temperature (REMOVE IV11??)
+```{r}
+##############################
+# plot
+##############################
+
+time_to_EPOC_plot <- ggplot() +
+  geom_jitter(data = epoc, aes(x = as.factor(temp), y = end_EPOC_min), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_errorbar(data = time_to_epoc_sum , aes(x = as.factor(temp), ymin = time_to_epoc_avg - error, ymax = time_to_epoc_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = time_to_epoc_sum , aes(x = as.factor(temp),  y = time_to_epoc_avg), size = 6, color = "black") +
+  geom_point(data = time_to_epoc_sum, aes(x = as.factor(temp),  y = time_to_epoc_avg, color = as.factor(temp)), size = 4.5) +
+  labs(y = "Time to EPOC (min)",
+       x = "Temperature (°C)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+```
+
+####**Part 4.** Plot MMR~50~ for each temperature (REMOVE IV11??)
+```{r}
+EPOC_at_MMR50_plot <- ggplot() +
+  geom_jitter(data = epoc, aes(x = as.factor(temp), y = EPOC_mmr), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_errorbar(data = epoc_at_MMR50_sum , aes(x = as.factor(temp), ymin = epoc_at_MMR50_avg - error, ymax = epoc_at_MMR50_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = epoc_at_MMR50_sum , aes(x = as.factor(temp),  y = epoc_at_MMR50_avg), size = 6, color = "black") +
+  geom_point(data = epoc_at_MMR50_sum, aes(x = as.factor(temp),  y = epoc_at_MMR50_avg, color = as.factor(temp)), size = 4.5) +
+  labs(y = expression("EPOC at" ~ MMR[50] ~"(mg" ~ O[2] ~ kg^-1*")"),
+       x = "Temperature (°C)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+```
+
+####**Part 5.** Plot time to MMR~50~ for each temperature (REMOVE IV11??)
+```{r}
+##############################
+# plot
+##############################
+
+time_to_MMR50_plot <- ggplot() +
+  geom_jitter(data = epoc, aes(x = as.factor(temp), y = end_EPOC.mmr), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_errorbar(data = time_to_MMR50_sum , aes(x = as.factor(temp), ymin = time_to_MMR50_avg - error, ymax = time_to_MMR50_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = time_to_MMR50_sum , aes(x = as.factor(temp),  y = time_to_MMR50_avg), size = 6, color = "black") +
+  geom_point(data = time_to_MMR50_sum, aes(x = as.factor(temp),  y = time_to_MMR50_avg, color = as.factor(temp)), size = 4.5) +
+  labs(y = expression("Time to" ~ MMR[50] ~ "(min)"),
+       x = "Temperature (°C)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+```
+
