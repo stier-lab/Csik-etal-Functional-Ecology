@@ -82,7 +82,7 @@ smr_plot <- ggplot() +
   geom_point(data = smr_sum, aes(x = as.factor(temp),  y = SMR_avg), size = 6, colour = "black") +
   geom_point(data = smr_sum, aes(x = as.factor(temp),  y = SMR_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Standard Metabolic Rate", paste("(",mg~O[2]~kg^-1~min^-1,")"))),
-       x = expression(paste("Temperature (", degree, "C)"))) +
+       x = "Temperature (°C)") +
   scale_y_continuous(breaks = seq(0, 1.6, by = 0.5)) +
   scale_color_manual(values=c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
   theme_classic() +
@@ -102,7 +102,7 @@ mmr_plot <- ggplot() +
   geom_point(data = mmr_sum, aes(x = as.factor(temp),  y = MMR_avg), size = 6, color = "black") +
   geom_point(data = mmr_sum, aes(x = as.factor(temp),  y = MMR_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Maximum Metabolic Rate", paste("(",mg~O[2]~kg^-1~min^-1,")"))),
-       x = expression(paste("Temperature (", degree, "C)"))) +
+       x = "Temperature (°C)") +
   ylim(0, 6.5) +
   scale_color_manual(values=c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
   theme_classic() +
@@ -122,7 +122,7 @@ aas_plot <- ggplot() +
   geom_point(data = aas_sum, aes(x = as.factor(temp),  y = AS_avg), size = 6, color = "black") +
   geom_point(data = aas_sum, aes(x = as.factor(temp),  y = AS_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Absolute Aerobic Scope", paste("(",mg~O[2]~kg^-1~min^-1,")"))),
-       x = expression(paste("Temperature (", degree, "C)"))) +
+       x = "Temperature (°C)") +
   ylim(0, 6.5) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
   theme_classic() +
@@ -142,7 +142,7 @@ fas_plot <- ggplot() +
   geom_point(data = fas_sum, aes(x = as.factor(temp),  y = FAS_avg), size = 6, color = "black") +
   geom_point(data = fas_sum, aes(x = as.factor(temp),  y = FAS_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Factorial Aerobic Scope", paste("(MMR/SMR)"))),
-       x = expression(paste("Temperature (", degree, "C)"))) +
+       x = "Temperature (°C)") +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
   theme_classic() +
   theme(axis.text = element_text(color = "black", size = 12),
@@ -174,7 +174,7 @@ rhr_plot <- ggplot() +
   geom_point(data = rhr_sum, aes(x = as.factor(temp),  y = hr_avg), size = 6, color = "black") +
   geom_point(data = rhr_sum, aes(x = as.factor(temp),  y = hr_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Resting Heart Rate", paste("(beats",~min^-1,")"))),
-       x = expression(paste("Temperature (", degree, "C)"))) +
+       x = "Temperature (°C)") +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral")) +
   theme_classic() +
   theme(axis.text = element_text(color = "black", size = 12),
