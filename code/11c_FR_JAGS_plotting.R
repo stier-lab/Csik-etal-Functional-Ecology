@@ -25,7 +25,7 @@
 # source code to run JAGS model; will automatically import data, packages, and functions
 ##############################
 
-source(here::here("code", "9b_FR_JAGS_model.R"))
+source(here::here("code", "11b_FR_JAGS_model.R"))
 
 ##############################
 # this will build a data.frame from the posteriors VERY VERY useful! taken from https://github.com/rpruim/CalvinBayes/blob/master/R/posterior.R 

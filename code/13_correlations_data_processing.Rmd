@@ -42,7 +42,7 @@ Combine metabolism and foraging data into the same data frame for correlational 
 # load required packages
 ##############################
 
-source(here::here("code", "0_libraries.R"))
+source(here::here("code", "00_libraries.R"))
 
 ##############################
 # load data

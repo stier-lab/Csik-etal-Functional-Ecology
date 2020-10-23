@@ -2,8 +2,8 @@
 # JAGS model for fitting functional responses - written by Bart DiFiore
 ###############################################################
 
-source(here::here("code", "0_libraries.R"))
-source(here::here("code","9a_JAGS_functions.R"))
+source(here::here("code", "00_libraries.R"))
+source(here::here("code","11a_JAGS_functions.R"))
 
 ##############################
 # import foraging assay data
