@@ -5,7 +5,7 @@
 library(bbmle) # functional response analysis (in Bart's JAGS setup)
 # library(boot) # bootstrapping
 # library(broom) # used alonside nls.multstart for tidying up model outputs
-# library(car) # model predictions
+library(car) # model predictions & general stats
 library(chron) # working with dates 
 library(corrplot) # correlation matrix
 library(cowplot) # organizing fig panels & printing plots

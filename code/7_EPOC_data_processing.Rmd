@@ -13,14 +13,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###**Summary**
 
-EPOC definition
-Spar
-How EPOC is calculated
+The metabolic cost of recovery is termed excess post-exercise oxygen consumption (EPOC) and is measured by esitmating the total amount of oxygen consumed during the recovery period ([Zhang et al. 2018](https://onlinelibrary.wiley.com/doi/pdf/10.1111/jfb.13593?casa_token=JnP8Y3k3fPoAAAAA:FsQV5g-1WeOs-5x0mpFZSamYvDwZz51OiJeC5nQsHZulAbVH4TaQlBOeplnxw3sZjbrAX3oTv5i2ap8)).
 
 ###**Outline**
 
 **Part 0.** Import libraries and data
-**Part 1.** Calculate treatment-level summary stats (will eventually be used for plotting)
+**Part 1.** Total EPOC summary stats 
+**Part 2.** Hourly EPOC summary stats
+**Part 3.** Time to EPOC summary stats
+**Part 4.** EPOC at MMR~50~ summary stats
+**Part 5.** Time to MMR~50~ summary stats
+**Part 6.** MMR~50~ summary stats
 
 ###**Packages Required:** 
 
@@ -50,16 +53,20 @@ epoc <- read_csv(here::here("data", "metabolism", "epoc.csv"))
 
 ####**Part 1.** Wrangle total EPOC for each treatment
 ```{r}
+##############################
+# total epoc summary
+##############################
+
 EPOC_full_summary <- epoc %>% 
   filter(spar == 0.2) %>% 
   group_by(temp) %>% 
   summarize(
-    epoc_full_avg = round(mean(EPOC_full), 3),
-    epoc_full_sd = round(sd(EPOC_full, na.rm = T), 3),
+    epoc_full_avg = mean(EPOC_full, na.rm = T),
+    epoc_full_sd = sd(EPOC_full, na.rm = T),
     epoc_full_se = epoc_full_sd/sqrt(length(EPOC_full)),
-    epoc_full_error = qnorm(0.975) * sd(EPOC_full)/sqrt(length(EPOC_full)),
-    epoc_full_upper95 = epoc_full_avg + epoc_full_error,
-    epoc_full_lower95 = epoc_full_avg - epoc_full_error
+    error = qnorm(0.975) * sd(EPOC_full)/sqrt(length(EPOC_full)),
+    epoc_full_upper95 = epoc_full_avg + error,
+    epoc_full_lower95 = epoc_full_avg - error
   )
 
 # write.csv(EPOC_full_summary, here::here("data", "metabolism", "outputs", "epoc_full_summary_stats.csv"), row.names = FALSE)
@@ -214,4 +221,21 @@ time_to_MMR50_summary <- epoc %>%
   )
 
 # write.csv(time_to_MMR50_summary, here::here("data", "metabolism", "outputs", "time_to_MMR50_summary_stats.csv"), row.names = FALSE)
+```
+
+####**Part 6.** Wrangle MMR~50~
+```{r}
+MMR50_summary <- epoc %>% 
+  filter(spar == 0.2) %>% 
+  group_by(temp) %>% 
+  summarize(
+    MMR50_avg = round(mean(MO2_mmr), 3),
+    MMR50_sd = round(sd(MO2_mmr), 3),
+    MMR50_se = MMR50_sd/sqrt(length(MO2_mmr)),
+    error = qnorm(0.975) * sd(MO2_mmr)/sqrt(length(MO2_mmr)),
+    MMR50_upper95 = MMR50_avg + error,
+    MMR50_lower95 = MMR50_avg - error
+  )
+
+# write.csv(MMR50_summary, here::here("data", "metabolism", "outputs", "MMR50_summary_stats.csv"), row.names = FALSE)
 ```

@@ -1,0 +1,23 @@
+﻿ID,temp,sex,CL_start,CL_end,weight_start,weight_end,notes
+N14,21,male,71.5,73.35,323,356,
+N15,21,male,78,76.5,408,384,
+N18,21,male,77,NA,444,NA,not euthanized
+N19,21,male,72.8,74.89,348,377,
+L3,21,male,75.9,76.44,370,374,
+L4,21,male,76.5,79.87,412,422,
+IV10,11,male,78.53,78.5,439,442,
+IV11,11,male,81.04,80.5,434,438,
+IV12,11,male,78.63,78,426,402,
+IV13,11,male,76.65,76,406,418,
+IV14,11,male,79.44,79,424,427,
+MM02,11,male,76.69,82,466,487,
+IV15,26,male,73,73.27,315,317,
+IV19,26,male,70,NA,308,NA,died some time after heart rate logger removal; likely from infection
+GP01,26,male,76.92,77.73,391,400,
+GP07,26,male,74,74.54,377,382,
+IV16,16,male,75,76.21,367,368,
+IV17,16,male,70,70.7,302,303,
+IV18,16,male,72,72.21,320,322,
+GP03,16,male,71.15,74.88,372,353,
+GP05,16,male,80.5,80.51,433,439,
+GP06,16,male,77.5,78.36,399,402,

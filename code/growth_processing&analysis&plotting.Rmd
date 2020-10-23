@@ -1,0 +1,223 @@
+---
+title: "Lobster Growth"
+author: "Sam Csik"
+date: "7/16/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+###**Outline**
+
+###**Required Packages:**
+
+###**Required Data:**
+
+####**Part 0.** Import packages and data  
+```{r}
+##############################
+# import libraries
+##############################
+
+source(here::here("code", "0_libraries.R"))
+
+##############################
+# load data
+##############################
+
+growth_data <- read_csv(here::here("data", "growth", "lobster_sizes.csv")) %>% 
+  filter(CL_end != "NA")
+```
+
+####**Part 1.**
+```{r}
+##############################
+# calculate change in CL and weight
+##############################
+
+growth_new <- growth_data %>% 
+  mutate(CL_change = CL_end - CL_start,
+         weight_change = weight_end - weight_start,
+         temp = as.factor(temp)) 
+```
+
+####**Part 2.**
+```{r}
+##############################
+# calculate summary stats
+##############################
+
+growth_summary <- growth_new %>% 
+  group_by(temp) %>% 
+  summarize(
+    CL_avg = mean(CL_change, na.rm = T),
+    W_avg = mean(weight_change, na.rm = T),
+    CL_sd = sd(CL_change, na.rm = T),
+    W_sd = sd(weight_change, na.rm = T),
+    CL_se = CL_sd/sqrt(length(CL_change)),
+    W_se = W_sd/sqrt(length(weight_change)),
+    CL_error = qnorm(0.975) * sd(CL_change)/sqrt(length(CL_change)),
+    W_error = qnorm(0.975) * sd(weight_change)/sqrt(length(weight_change)),
+    CL_upper95 = CL_avg + CL_error,
+    W_upper95 = W_avg + W_error,
+    CL_lower95 = CL_avg - CL_error,
+    W_lower95 = W_avg - W_error
+  )
+```
+
+###**Part 3.**
+```{r}
+##############################
+# plot change in mass
+##############################
+
+CL_change_plot <- ggplot() +
+  geom_jitter(growth_new, mapping = aes(x = temp, y = CL_change), size = 3, alpha = 0.2, width = 0.2) +
+  geom_errorbar(growth_summary, mapping = aes(x = temp, ymin = CL_avg - CL_se, ymax = CL_avg + CL_se), width = 0.1, size = 1, color = "black") +
+  geom_point(growth_summary, mapping = aes(x = temp, y = CL_avg), size = 6, color = "black") +
+  geom_point(data = growth_summary, mapping = aes(x = temp,  y = CL_avg, color = temp), size = 4.5) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(x = "Temperature (°C)",
+       y = "Change in Carapace Length (mm)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  scale_y_continuous(breaks = seq(-2, 6, by = 1)) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+
+##############################
+# plot change in weight
+##############################
+
+weight_change_plot <- ggplot() +
+  geom_jitter(growth_new, mapping = aes(x = temp, y = weight_change), size = 3, alpha = 0.2, width = 0.2) +
+  geom_errorbar(growth_summary, mapping = aes(x = temp, ymin = W_avg - W_se, ymax = W_avg + W_se), width = 0.1, size = 1, color = "black") +
+  geom_point(growth_summary, mapping = aes(x = temp, y = W_avg), size = 6, color = "black") +
+  geom_point(data = growth_summary, mapping = aes(x = temp,  y = W_avg, color = temp), size = 4.5) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(x = "Temperature (°C)",
+       y = "Change in Body Mass (g)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  scale_y_continuous(breaks = seq(-30, 40, by = 10)) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+
+##############################
+# plot change in CL vs. change in mass 
+##############################
+
+# ggplot(growth_new, aes(x = CL_change, y = weight_change)) +
+#   geom_point()
+```
+
+####**Part 4.**
+```{r}
+##############################
+# combine plots 
+##############################
+
+growth_plot <- cowplot::plot_grid(CL_change_plot, weight_change_plot, nrow = 1, align = "vh", labels = "AUTO")
+
+##############################
+# print
+##############################
+
+cowplot::save_plot(here::here("figures", "Fig?_growth.pdf"), growth_plot, base_width = 10, base_height = 5)
+```
+
+####**Part 5.** Test for nomrality? Low sample size though; Run ANOVA to compare treatment means; Fit linear and quadratic models to test shape of response?  Run t-tests to compare each treatment to 0?
+```{r}
+##############################
+# Shapiro test for each metabolic trait and avg eaten 
+  # N0 = data are normal
+  # NA = data are not normal
+##############################
+
+shapiro.test(growth_new$CL_change) # p = 0.03456 not good
+shapiro.test(growth_new$weight_change) # p = 0.02263 not good
+
+##############################
+# visual inspection using Q-Q plots
+##############################
+
+ggqqplot(growth_new$CL_change, ylab = "CL (mm)") # pretty good
+ggqqplot(growth_new$weight_change, ylab = "body weight (g)") # not good
+
+##############################
+# histograms
+##############################
+
+ggplot(growth_new, aes(x = CL_change)) +
+  geom_histogram()
+
+ggplot(growth_new, aes(x = weight_change)) +
+  geom_histogram()
+
+##############################
+# test for equal variances
+  # N0 = equal variances
+  # NA = unequal variances
+##############################
+
+leveneTest(CL_change ~ temp, growth_new) # p = 0.7897 unequal
+leveneTest(weight_change ~ temp, growth_new) # p = 0.2218 unequal
+
+##############################
+# ANOVA
+##############################
+
+CL_anova <- aov(CL_change ~ temp, data = growth_new)
+summary(CL_anova) # p = 0.866
+
+W_anova <- aov(weight_change ~ temp, data = growth_new)
+summary(W_anova) # p = 0.666 uh oh
+
+##############################
+# fit lm (linear vs quadratic) for CL
+##############################
+
+# make temp numeric
+growth_data2 <- growth_new %>% 
+  mutate(temp = as.numeric(as.character(temp)))
+
+# linear model
+CL_lm_mod <- lm(formula = CL_change ~ temp, data = growth_data2)
+summary(CL_lm_mod)
+
+# quadratic model
+temp2 <- growth_data2$temp^2 # temp squared
+CL_quadratic_mod <- lm(CL_change ~ temp + temp2, data = growth_data2)
+summary(CL_quadratic_mod)
+
+AIC(CL_lm_mod, CL_quadratic_mod)
+
+##############################
+# fit lm (linear vs quadratic) for weight
+##############################
+
+# linear model
+W_lm_mod <- lm(formula = weight_change ~ temp, data = growth_data2)
+summary(W_lm_mod)
+
+# quadratic model
+temp2 <- growth_data2$temp^2 # temp squared
+W_quadratic_mod <- lm(weight_change ~ temp + temp2, data = growth_data2)
+summary(W_quadratic_mod)
+
+AIC(W_lm_mod, W_quadratic_mod)
+```
+
+

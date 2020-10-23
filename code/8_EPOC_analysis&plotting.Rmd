@@ -40,6 +40,11 @@ source(here::here("code", "0_libraries.R"))
 
 epoc <- read_csv(here::here("data", "metabolism", "epoc.csv")) %>% filter(spar == 0.2)
 
+IV11 <- epoc %>% filter(ID == "IV11")
+IV13 <- epoc %>% filter(ID == "IV13")
+IV16 <- epoc %>% filter(ID == "IV16")
+GP07 <- epoc %>% filter(ID == "GP07")
+
 epoc_full_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_full_summary_stats.csv"))
 
 epoc_hourly_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_hourly_summary_stats.csv")) %>% 
@@ -50,17 +55,23 @@ time_to_epoc_sum <- read_csv(here::here("data", "metabolism", "outputs", "time_t
 epoc_at_MMR50_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_at_MMR50_summary_stats.csv"))
 
 time_to_MMR50_sum <- read_csv(here::here("data", "metabolism", "outputs", "time_to_MMR50_summary_stats.csv"))
+
+MMR50_sum <- read_csv(here::here("data", "metabolism", "outputs", "MMR50_summary_stats.csv"))
 ```
 
-####**Part 1.** Plot total EPOC for each temperature (REMOVE IV11??) (CURRENTLY 95% CI)
+####**Part 1.** Plot total EPOC for each temperature & run ANOVA
 ```{r}
 ##############################
 # plot
 ##############################
 
 full_EPOC_plot <- ggplot() +
-  geom_jitter(data = epoc, aes(x = as.factor(temp), y = EPOC_full), color = "black", width = 0.2, alpha = 0.2, size = 3) +
-  geom_errorbar(data = epoc_full_sum, aes(x = as.factor(temp), ymin = epoc_full_avg - epoc_full_error, ymax = epoc_full_avg + epoc_full_error), width = 0.1, size = 1, color = "black") +
+  geom_jitter(data = epoc, aes(x = as.factor(temp), y = EPOC_full), color = "black", alpha = 0.2, width = 0.2, size = 3) + 
+  # geom_point(data = IV11, aes(x = as.factor(temp), y = EPOC_full), color = "red", alpha = 0.5, size = 3) +
+  # geom_point(data = IV13, aes(x = as.factor(temp), y = EPOC_full), color = "blue", alpha = 0.5, size = 3) +
+  # geom_point(data = GP07, aes(x = as.factor(temp), y = EPOC_full), color = "green", alpha = 0.5, size = 3) +
+  # geom_point(data = IV16, aes(x = as.factor(temp), y = EPOC_full), color = "purple", alpha = 0.5, size = 3) +
+  geom_errorbar(data = epoc_full_sum, aes(x = as.factor(temp), ymin = epoc_full_avg - epoc_full_se, ymax = epoc_full_avg + epoc_full_se), width = 0.1, size = 1, color = "black") + # sub se for "error" to get 95% CI
   geom_point(data = epoc_full_sum, aes(x = as.factor(temp),  y = epoc_full_avg), size = 6, color = "black") +
   geom_point(data = epoc_full_sum, aes(x = as.factor(temp),  y = epoc_full_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression("Cumulative EPOC (mg" ~ O[2] ~kg^-1*")"),
@@ -72,9 +83,22 @@ full_EPOC_plot <- ggplot() +
         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
         plot.caption = element_text(size = 10, hjust = 0),
         legend.position = "none")
+
+##############################
+# ANOVA
+##############################
+
+shapiro.test(epoc$EPOC_full) # p = 0.03425 not normal
+ggqqplot(epoc$EPOC_full, ylab = "EPOC") 
+leveneTest(EPOC_full ~ as.factor(temp), epoc) # p = 0.2559 equal variances
+
+EPOC_anova <- aov(EPOC_full ~ as.factor(temp), data = epoc)
+summary(EPOC_anova) 
+
+
 ```
 
-####**Part 2.** Plot hourly EPOC for each temperature (REMOVE IV11??)
+####**Part 2.** Plot hourly EPOC for each temperature (REMOVE IV11??) (CURRENTLY SE)
 ```{r}
 ##############################
 # plot
@@ -82,10 +106,10 @@ full_EPOC_plot <- ggplot() +
 
 pd = position_dodge(0.4)
 
-hourly_EPOC_plot <- ggplot(epoc_sum, aes(x = hour, y = mean, group = temp, color = temp)) +
+hourly_EPOC_plot <- ggplot(epoc_hourly_sum, aes(x = hour, y = mean, group = temp, color = temp)) +
   geom_line(position = pd, alpha = 0.6, size = 1.05) +
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se, color = temp), width = 0.2, position = pd, alpha = 0.6) +
-  geom_point(data = epoc_sum, aes(x = hour, y = mean, group = temp, color = temp, shape = temp, size = temp), position = pd) +
+  geom_point(data = epoc_hourly_sum, aes(x = hour, y = mean, group = temp, color = temp, shape = temp, size = temp), position = pd) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
   scale_shape_manual(values = c(15, 16, 17, 18), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
   scale_size_manual(values = c(4, 4, 4, 5), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
@@ -101,8 +125,6 @@ hourly_EPOC_plot <- ggplot(epoc_sum, aes(x = hour, y = mean, group = temp, color
         legend.background = element_blank(),
         legend.box.just = "right",
         legend.title.align = 0.5)
-
-# cowplot::save_plot(here::here("figures","supplemental", "FigS?.pdf"), hourly_EPOC_plot, base_width = 6, base_height = 5)
 ```
 
 ####**Part 3.** Plot time to EPOC for each temperature (REMOVE IV11??)
@@ -112,8 +134,12 @@ hourly_EPOC_plot <- ggplot(epoc_sum, aes(x = hour, y = mean, group = temp, color
 ##############################
 
 time_to_EPOC_plot <- ggplot() +
-  geom_jitter(data = epoc, aes(x = as.factor(temp), y = end_EPOC_min), color = "black", width = 0.2, alpha = 0.2, size = 3) +
-  geom_errorbar(data = time_to_epoc_sum , aes(x = as.factor(temp), ymin = time_to_epoc_avg - error, ymax = time_to_epoc_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = epoc, aes(x = as.factor(temp), y = end_EPOC_min), color = "black", alpha = 0.5, size = 3) + # width = 0.2, alpha = 0.2
+  geom_point(data = IV11, aes(x = as.factor(temp), y = end_EPOC_min), color = "red", alpha = 0.5, size = 3) +
+    geom_point(data = IV13, aes(x = as.factor(temp), y = end_EPOC_min), color = "blue", alpha = 0.5, size = 3) +
+  geom_point(data = GP07, aes(x = as.factor(temp), y = end_EPOC_min), color = "green", alpha = 0.5, size = 3) +
+  geom_point(data = IV16, aes(x = as.factor(temp), y = end_EPOC_min), color = "purple", alpha = 0.5, size = 3) +
+  geom_errorbar(data = time_to_epoc_sum , aes(x = as.factor(temp), ymin = time_to_epoc_avg - time_to_epoc_se, ymax = time_to_epoc_avg + time_to_epoc_se), width = 0.1, size = 1, color = "black") + # sub se for "error" for 95% CI
   geom_point(data = time_to_epoc_sum , aes(x = as.factor(temp),  y = time_to_epoc_avg), size = 6, color = "black") +
   geom_point(data = time_to_epoc_sum, aes(x = as.factor(temp),  y = time_to_epoc_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = "Time to EPOC (min)",
@@ -130,8 +156,12 @@ time_to_EPOC_plot <- ggplot() +
 ####**Part 4.** Plot MMR~50~ for each temperature (REMOVE IV11??)
 ```{r}
 EPOC_at_MMR50_plot <- ggplot() +
-  geom_jitter(data = epoc, aes(x = as.factor(temp), y = EPOC_mmr), color = "black", width = 0.2, alpha = 0.2, size = 3) +
-  geom_errorbar(data = epoc_at_MMR50_sum , aes(x = as.factor(temp), ymin = epoc_at_MMR50_avg - error, ymax = epoc_at_MMR50_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = epoc, aes(x = as.factor(temp), y = EPOC_mmr), color = "black", alpha = 0.5, size = 3) + #  width = 0.2, alpha = 0.2,
+  geom_point(data = IV11, aes(x = as.factor(temp), y = EPOC_mmr), color = "red", alpha = 0.5, size = 3) +
+    geom_point(data = IV13, aes(x = as.factor(temp), y = EPOC_mmr), color = "blue", alpha = 0.5, size = 3) +
+  geom_point(data = GP07, aes(x = as.factor(temp), y = EPOC_mmr), color = "green", alpha = 0.5, size = 3) +
+  geom_point(data = IV16, aes(x = as.factor(temp), y = EPOC_mmr), color = "purple", alpha = 0.5, size = 3) +
+  geom_errorbar(data = epoc_at_MMR50_sum , aes(x = as.factor(temp), ymin = epoc_at_MMR50_avg - epoc_at_MMR50_se, ymax = epoc_at_MMR50_avg + epoc_at_MMR50_se), width = 0.1, size = 1, color = "black") + # replace with error for 95% CI
   geom_point(data = epoc_at_MMR50_sum , aes(x = as.factor(temp),  y = epoc_at_MMR50_avg), size = 6, color = "black") +
   geom_point(data = epoc_at_MMR50_sum, aes(x = as.factor(temp),  y = epoc_at_MMR50_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression("EPOC at" ~ MMR[50] ~"(mg" ~ O[2] ~ kg^-1*")"),
@@ -152,7 +182,11 @@ EPOC_at_MMR50_plot <- ggplot() +
 ##############################
 
 time_to_MMR50_plot <- ggplot() +
-  geom_jitter(data = epoc, aes(x = as.factor(temp), y = end_EPOC.mmr), color = "black", width = 0.2, alpha = 0.2, size = 3) +
+  geom_point(data = epoc, aes(x = as.factor(temp), y = end_EPOC_mmr), color = "black", alpha = 0.5, size = 3) + # width = 0.2, alpha = 0.2,
+  geom_point(data = IV11, aes(x = as.factor(temp), y = end_EPOC_mmr), color = "red", alpha = 0.5, size = 3) +
+  geom_point(data = IV13, aes(x = as.factor(temp), y = end_EPOC_mmr), color = "blue", alpha = 0.5, size = 3) +
+  geom_point(data = GP07, aes(x = as.factor(temp), y = end_EPOC_mmr), color = "green", alpha = 0.5, size = 3) +
+  geom_point(data = IV16, aes(x = as.factor(temp), y = end_EPOC_mmr), color = "purple", alpha = 0.5, size = 3) +
   geom_errorbar(data = time_to_MMR50_sum , aes(x = as.factor(temp), ymin = time_to_MMR50_avg - error, ymax = time_to_MMR50_avg + error), width = 0.1, size = 1, color = "black") +
   geom_point(data = time_to_MMR50_sum , aes(x = as.factor(temp),  y = time_to_MMR50_avg), size = 6, color = "black") +
   geom_point(data = time_to_MMR50_sum, aes(x = as.factor(temp),  y = time_to_MMR50_avg, color = as.factor(temp)), size = 4.5) +
@@ -167,3 +201,39 @@ time_to_MMR50_plot <- ggplot() +
         legend.position = "none")
 ```
 
+####**Part 6.** Plot MMR~50~ for each temperature (REMOVE IV11??)
+```{r}
+##############################
+# plot
+##############################
+
+MMR50_plot <- ggplot() +
+  geom_point(data = epoc, aes(x = as.factor(temp), y = MO2_mmr), color = "black", alpha = 0.5, size = 3) + # width = 0.2, alpha = 0.2
+    geom_point(data = IV11, aes(x = as.factor(temp), y = MO2_mmr), color = "red", alpha = 0.5, size = 3) + 
+    geom_point(data = IV13, aes(x = as.factor(temp), y = MO2_mmr), color = "blue", alpha = 0.5, size = 3) +
+  geom_point(data = GP07, aes(x = as.factor(temp), y = MO2_mmr), color = "green", alpha = 0.5, size = 3) +
+  geom_point(data = IV16, aes(x = as.factor(temp), y = MO2_mmr), color = "purple", alpha = 0.5, size = 3) +
+  geom_errorbar(data = MMR50_sum , aes(x = as.factor(temp), ymin = MMR50_avg - error, ymax = MMR50_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = MMR50_sum , aes(x = as.factor(temp),  y = MMR50_avg), size = 6, color = "black") +
+  geom_point(data = MMR50_sum, aes(x = as.factor(temp),  y = MMR50_avg, color = as.factor(temp)), size = 4.5) +
+  labs(y = expression(MMR[50] ~"(mg" ~ O[2] ~ kg^-1 ~ min^-1*")"),
+       x = "Temperature (°C)") +
+  scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 13),
+        panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+        plot.caption = element_text(size = 10, hjust = 0),
+        legend.position = "none")
+```
+
+####**Part 7.** Combine plots
+```{r}
+##############################
+# combine panels and save
+##############################
+
+epoc_plot <- cowplot::plot_grid(full_EPOC_plot, hourly_EPOC_plot, time_to_EPOC_plot, EPOC_at_MMR50_plot, time_to_MMR50_plot, MMR50_plot, nrow = 2, align = "vh", labels = "AUTO")
+
+cowplot::save_plot(here::here("figures", "Fig?_highlights.pdf"), epoc_plot, base_width = 15, base_height = 8)
+```
