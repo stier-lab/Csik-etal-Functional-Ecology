@@ -176,7 +176,7 @@ corr_matrix <- corrplot(corr_df,
 ##############################
 
 smr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = SMR, y = avg_eaten)) + 
-  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.02, color = "lightgray") +
+  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.02, color = "gray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)", labels = c("11", "16", "21", "26")) +
@@ -211,7 +211,7 @@ smr_marg <- ggMarginal(smr_corr_plot, type = "density", size = 4, groupColour = 
 ##############################
 
 mmr_corr_plot <- ggplot(metabolism_foraging_data, aes(x = MMR, y = avg_eaten)) + 
-  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "lightgray") +
+  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "gray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
@@ -245,7 +245,7 @@ mmr_marg <- ggMarginal(mmr_corr_plot, type = "density", size = 4, groupColour = 
 ##############################
 
 aas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = AAS, y = avg_eaten)) + 
-  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "lightgray") +
+  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.07, color = "gray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
@@ -276,7 +276,7 @@ aas_marg <- ggMarginal(aas_corr_plot, type = "density", size = 4, groupColour = 
 ##############################
 
 fas_corr_plot <- ggplot(metabolism_foraging_data, aes(x = FAS, y = avg_eaten)) + 
-  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.3, color = "lightgray") +
+  geom_errorbar(aes(ymin = avg_eaten - sd_eaten, ymax = avg_eaten + sd_eaten), width = 0.3, color = "gray") +
   geom_point(aes(color = temp, shape = temp, size = temp)) + 
   geom_smooth(method = "lm", color = "gray36", size = 0.75, level = 0.95) +
   scale_color_manual(values = c("lightslategray", "lightblue", "lightcoral", "indianred4"), name = "Temperature (°C)") +
@@ -311,6 +311,6 @@ fas_marg <- ggMarginal(fas_corr_plot, type = "density", size = 4, groupColour = 
 
 correlations_plot <- cowplot::plot_grid(smr_marg, mmr_marg, aas_marg, fas_marg, nrow = 2, labels = "AUTO", axis = "tblr", rel_widths = c(0.95, 0.80, 0.95, 0.80))
 
-cowplot::save_plot(here::here("figures", "main_text", "Fig5.pdf"), correlations_plot, base_width = 10, base_height = 10)
+cowplot::save_plot(here::here("figures", "main_text", "Fig5_updated2.pdf"), correlations_plot, base_width = 10, base_height = 10)
 
 ```
