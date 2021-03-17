@@ -3,7 +3,7 @@
 ###############################################################
 
 source(here::here("code", "00_libraries.R"))
-source(here::here("code","11a_JAGS_functions.R"))
+source(here::here("code","11a_FR_JAGS_functions.R"))
 
 ##############################
 # import foraging assay data

@@ -72,7 +72,7 @@ df <- df %>% mutate(id = as.character(rownames(df))) %>%
 # read in raw data to fiugre otu which lobsters belong in which treatments
 ##############################
 
-fr_data <- read_csv(here::here("data", "functional_response", "raw", "foraging_assay_data.csv")) %>% 
+fr_data <- read_csv(here::here("data", "foraging", "raw", "foraging_assay_data.csv")) %>% 
   mutate(consumption_rate = Killed/24)
 
 formerge <- distinct(fr_data, lobster_id, temp) %>% dplyr::rename(id = lobster_id) %>% mutate(temp = paste("t", temp, sep = "")) 
@@ -88,11 +88,19 @@ df.treat.fits <- df[df$id %in% c("t11", "t16", "t21", "t26"), ] %>% dplyr::renam
 # plot it up and save (Fig 4)
 ##############################
 
+# geom_text() labels
+temp_labels <- data.frame(
+  label = c("11°C", "16°C", "21°C", "26°C"),
+  temp = c("t11", "t16", "t21", "t26")
+)
+
+# plot
 functional_response_plot <- ggplot() +
   geom_jitter(data = s, aes(x = initial, y = killed/24), alpha = 0.7, shape = 1, width = 0.1) + #shape = lobster_id, , size = 2
   geom_line(data = df.treat.fits, aes(x = N.seq, y = mu, col = factor(temp), group = temp), size = 1.4) +
   geom_ribbon(data = df.treat.fits, aes(x = N.seq, ymin=mu.lower, ymax=mu.upper), linetype=2, alpha=0.1)+
   geom_line(data = df.ind.fits, aes(x = N.seq, y = mu, group = id), alpha = 0.7, color = "darkgray") +
+  geom_text(data = temp_labels, mapping = aes(x = 5, y = 1.4, label = label, fontface = "bold")) +
   facet_wrap(~temp, nrow = 1) +
   scale_x_continuous(breaks = seq(0, 60, by = 10)) +
   scale_y_continuous(breaks = seq(0, 1.5, by = 0.25)) +
@@ -101,7 +109,7 @@ functional_response_plot <- ggplot() +
   ylab(expression(atop("Consumption Rate", paste( "\n(prey consumed" ~ predator^{-1} ~ hr^{-1},")")))) +
   guides(color = guide_legend("Temperature (°C)")) +
   theme_classic(base_size = 12) +
-  theme(axis.text = element_text(color = "black", size = 10),
+  theme(axis.text = element_text(color = "black", size = 12),
         axis.title = element_text(size = 13),
         axis.title.y = element_text(hjust = 0.5), 
         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
@@ -110,7 +118,7 @@ functional_response_plot <- ggplot() +
         strip.text = element_text(size = 12),
         legend.position = "none")
 
-# cowplot::save_plot(here::here("figures", "main_text", "Fig4.pdf"), functional_response_plot, base_width = 10, base_height = 3)
+cowplot::save_plot(here::here("figures", "main_text", "Fig4_updated.pdf"), functional_response_plot, base_width = 10, base_height = 3)
 
 ##############################
 # plot to look for correlation amongst predictors
