@@ -33,4 +33,4 @@ library(rjags) # JAGS analysis (in Bart's JAGS setup)
 library(sjPlot) # create tables from model outputs
 library(tidyverse) # the true hero - data wrangling & visualization (in Bart's JAGS setup)
 library(tidybayes) # get credible intervals for functional responses
-
+library(readr)
