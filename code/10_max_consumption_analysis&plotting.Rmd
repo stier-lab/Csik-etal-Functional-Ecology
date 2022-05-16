@@ -58,7 +58,6 @@ mc_summary <- read_csv(here::here("data", "foraging", "outputs", "max_consump_su
 
 foraging60 <- foraging_assays %>% 
   filter(Initial == "60") %>% 
-  mutate(temp = as.factor(temp))
 
 ##############################
 # fit lmer (3 levels (assays) per lobster, but need to account for lobster as random effect so still using this method)
@@ -67,6 +66,14 @@ foraging60 <- foraging_assays %>%
 consump_mod <- lmerTest::lmer(Killed ~ temp + (1|lobster_id), foraging60) # varying slope only
 summary(consump_mod)
 summary(multcomp::glht(consump_mod, linfct = multcomp::mcp(temp = "Tukey")))
+
+#analyze as continuous?
+foraging60b<-foraging60 %>%
+    mutate(temp = as.numeric(temp))
+
+cmod<-lmerTest::lmer(Killed ~ temp + (1|lobster_id), foraging60b)
+  summary(cmod)
+
 
 ##############################
 # diagnostics
@@ -107,10 +114,11 @@ foraging60 <- foraging_assays %>%
 ##############################
 
 consumption_plot <- ggplot() + 
-  geom_jitter(data = foraging60, aes(x = as.factor(temp), y = Killed), color = "black", width = 0.2, alpha = 0.2, size = 3) + 
-  geom_errorbar(data = mc_summary, aes(x = as.factor(temp), ymin = consump_avg - error, ymax = consump_avg + error), width = 0.1, size = 1, color = "black") +
-  geom_point(data = mc_summary, aes(x =  as.factor(temp),  y = consump_avg), size = 6, colour = "black") +
-  geom_point(data = mc_summary, aes(x = as.factor(temp),  y = consump_avg, color = as.factor(temp)), size = 4.5) +
+  geom_jitter(data = foraging60, aes(x = temp, y = Killed), color = "black", width = 0.2, alpha = 0.2, size = 3) + 
+  geom_smooth(data = foraging60,aes(x=temp,y=Killed),colour = "black", method = "lm",se=F)+
+  geom_errorbar(data = mc_summary, aes(x = temp, ymin = consump_avg - error, ymax = consump_avg + error), width = 0.1, size = 1, color = "black") +
+  geom_point(data = mc_summary, aes(x =  temp,  y = consump_avg), size = 6, colour = "black") +
+  geom_point(data = mc_summary, aes(x = temp,  y = consump_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Maximum Consumption Rate", paste("(prey consumed" ~ predator^{-1} ~ "24",~hr^{-1},")"))),
        x = expression(paste("Temperature (", degree, "C)"))) +
   ylim(0, 35) +
@@ -120,8 +128,10 @@ consumption_plot <- ggplot() +
         axis.title = element_text(size = 13),
         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
         plot.caption = element_text(size = 10, hjust = 0),
-        legend.position = "none")
+        legend.position = "none")+
+      scale_x_continuous(limits=c(10, 28),breaks=c(11,16,21,26)) 
 
-# cowplot::save_plot(here::here("figures", "main_text", "Fig3.pdf"), consumption_plot, base_width = 4, base_height = 4)
+
+cowplot::save_plot(here::here("figures", "main_text", "Fig3.pdf"), consumption_plot, base_width = 5, base_height = 4)
 ```
 

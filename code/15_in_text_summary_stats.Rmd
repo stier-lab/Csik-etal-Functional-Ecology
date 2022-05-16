@@ -92,6 +92,11 @@ smr16_avg <- smr_summary[2,2]
 smr21_avg <- smr_summary[3,2]
 smr26_avg <- smr_summary[4,2]
 
+#maximum smr
+smrmax<-max(smr11_avg,smr16_avg,smr21_avg,smr26_avg)
+pofmax<-data.frame("temperature"=c(11,16,21,26),"smrpofmax"=round(100*c(as.numeric(c(smr11_avg,smr16_avg,smr21_avg,smr26_avg))/smrmax)))
+
+
 ##############################
 # mmr averages
 ##############################
@@ -109,6 +114,10 @@ aas11_avg <- aas_summary[1,2]
 aas16_avg <- aas_summary[2,2]
 aas21_avg <- aas_summary[3,2]
 aas26_avg <- aas_summary[4,2]
+
+aasmax<-max(aas11_avg,aas16_avg,aas21_avg,aas26_avg)
+pofmax$aaspofmax<-round(100*c(as.numeric(c(aas11_avg,aas16_avg,aas21_avg,aas26_avg))/aasmax))
+
 
 ##############################
 # fas averages
@@ -135,6 +144,26 @@ mc11_avg <- mc_summary[1,2]
 mc16_avg <- mc_summary[2,2]
 mc21_avg <- mc_summary[3,2]
 mc26_avg <- mc_summary[4,2]
+
+mcmax<-max(mc11_avg,mc16_avg,mc21_avg,mc26_avg)
+pofmax$mcpofmax<-round(100*c(as.numeric(c(mc11_avg,mc16_avg,mc21_avg,mc26_avg))/mcmax))
+
+pofmax2<-
+pofmax%>%
+pivot_longer(!temperature,names_to = "measurement", values_to = "count")
+
+ggplot(data=pofmax2,aes(x=temperature,y=count,
+                        group=measurement,colour=measurement
+                        ))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE)+
+  theme_classic()+
+  scale_colour_discrete(name = "Measurement", labels = c("AAS", "Consumption", "SMR"))+
+  ylab("% of maximum")+
+  xlab("Temperature")
+  
+
+
 ```
 
 ####**Part 2.** Q~10~ calculations; Q~10~ = (R2/R1)^(10/(T2-T1)))
@@ -178,7 +207,7 @@ mc_Q10_21to26 <- (mc26_avg/mc21_avg) ^(10/(26-21))
 ####**Part 3.** Values reported in-text
 ```{r}
 # "SMR increased linearly by approximately 110% for each 5°C increase in temperature"
-((smr26_avg - smr11_avg)/smr11_avg * 100)/3
+((smr26_avg - smr11_avg)/smr11_avg * 100)
 
 # "For example, inter-individual variation in SMR at 11°C was 1.7 times greater than that observed among individuals at 16°C""
 smr11_cv <- smr_summary[1,5]
