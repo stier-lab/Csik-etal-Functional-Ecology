@@ -1,0 +1,201 @@
+---
+title: "Metabolic Trait Analysis"
+author: "Sam Csik"
+date: "6/23/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+We examine the relationship between lobster metabolic traits (SMR, MMR, AAS) and temperature by fitting linear and nonlinear models to the data and using AIC to determine the best fit model.
+
+###**Outline**
+
+**Part 0.** Import libraries and data
+**Part 1.** (TABLE S5 GENERATED HERE) Compare linear and exponential model fits to SMR data
+**Part 2.** (TABLE S6 GENERATED HERE) Compare linear and quadratic model fits to MMR data
+**Part 3.** (TABLE S7 GENERATED HERE) Compare linear and quadratic model fits to AAS data
+
+###**Packages Required:** 
+
+    - sjPlot
+
+###**Data Required:**
+
+**(file path: data/metabolism)**
+
+    - metabolic_traits.csv
+
+####**Part 0.** Import packages and data   
+```{r}
+##############################
+# import libraries
+##############################
+
+source(here::here("code", "00_libraries.R"))
+
+##############################
+# load data
+##############################
+
+metabolic_rates <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv")) %>% 
+  mutate(temp = as.numeric(as.character(temp)))
+
+# epoc <- read_csv(here::here("data", "metabolism", "epoc.csv"))
+# 
+# epoc_sum <- read_csv(here::here("data", "metabolism", "outputs", "epoc_summary_stats.csv")) %>% 
+#   mutate(temp = as.factor(temp))
+```
+
+####**Part 1.** Fit linear and exponential models to *SMR* data; create table for supplement
+```{r}
+##############################
+# fit models
+##############################
+
+# linear model
+smr_lm_mod <- lm(formula = SMR ~ temp, data = metabolic_rates)
+summary(smr_lm_mod)
+
+# exponential model
+smr_exponential_mod <- lm(log(SMR) ~ temp, data = metabolic_rates)
+summary(smr_exponential_mod)
+
+##############################
+# create table (manually edit aesthetics in Word)
+##############################
+
+tab_model(smr_lm_mod, smr_exponential_mod,
+          dv.labels = c("Linear", "Exponential"),
+          pred.labels = c(`(Intercept)` = "Intercept",
+                          temp = "Temperature (°C)",
+                          `all_mr_mod$temp [log]` = "log(Temperature(°C))"),
+          string.pred = "Coefficient",
+          string.est = "Estimate",
+          show.se = TRUE,
+          string.se = "SE",
+          string.ci = "95% CI",
+          show.aic = TRUE)
+```
+
+####**Part 2.** Fit linear and quadratic models to *MMR* data; create table for supplement
+```{r}
+##############################
+# fit models
+##############################
+
+# linear model
+mmr_lm_mod <- lm(formula = MMR ~ temp, data = metabolic_rates)
+summary(mmr_lm_mod)
+
+# quadratic model
+temp2 <- metabolic_rates$temp^2 # temp squared
+mmr_quadratic_mod <- lm(MMR ~ temp + temp2, data = metabolic_rates)
+summary(mmr_quadratic_mod)
+
+##############################
+# create table (manually edit aesthetics in Word)
+##############################
+
+tab_model(mmr_lm_mod, mmr_quadratic_mod,
+          dv.labels = c("Linear", "Quadratic"),
+          pred.labels = c(`(Intercept)` = "Intercept",
+                          temp = "Temperature (°C)",
+                          `all_mr_mod$temp [log]` = "Temperature(°C)^2"),
+          string.pred = "Coefficient",
+          string.est = "Estimate",
+          show.se = TRUE,
+          string.se = "SE",
+          string.ci = "95% CI",
+          show.aic = TRUE)
+```
+
+####**Part 3.** Fit linear and quadratic models to *AAS* data; create table for supplement
+```{r}
+##############################
+# fit models
+##############################
+
+# linear model
+aas_lm_mod <- lm(formula = AAS ~ temp, data = metabolic_rates)
+summary(aas_lm_mod)
+
+# quadratic model
+temp2 <- metabolic_rates$temp^2 # temp squared
+aas_quadratic_mod <- lm(AAS ~ temp + temp2, data = metabolic_rates)
+summary(aas_quadratic_mod)
+
+##############################
+# create table (manually edit aesthetics in Word)
+##############################
+
+tab_model(aas_lm_mod, aas_quadratic_mod,
+          dv.labels = c("Linear", "Quadratic"),
+          pred.labels = c(`(Intercept)` = "Intercept",
+                          temp = "Temperature (°C)",
+                          `all_mr_mod$temp [log]` = "Temperature(°C)^2"),
+          string.pred = "Coefficient",
+          string.est = "Estimate",
+          show.se = TRUE,
+          string.se = "SE",
+          string.ci = "95% CI",
+          show.aic = TRUE)
+```
+
+####**Part 4.** Plot hourly EPOC (0-5 hrs post MMR) for each temperature
+```{r}
+##############################
+# wrangle EPOC data
+##############################
+
+# epoc_long <- epoc %>% 
+#   gather(EPOC_1hr, EPOC_2hr, EPOC_3hr, EPOC_4hr, EPOC_5hr, key = hour, value = EPOC) %>%
+#   mutate(temp = as.factor(temp)) %>%
+#   mutate(
+#     hour_labels = case_when(
+#       hour == "EPOC_1hr" ~ "1",
+#       hour == "EPOC_2hr" ~ "2",
+#       hour == "EPOC_3hr" ~ "3",
+#       hour == "EPOC_4hr" ~ "4",
+#       hour == "EPOC_5hr" ~ "5"
+#     )
+#   )
+
+##############################
+# plot EPOC over time for each temp
+##############################
+
+# wrangle
+# epoc_sum_new <- epoc_sum %>% 
+#    mutate(
+#     hour_labels = case_when(
+#       hour == "EPOC_1hr" ~ "1",
+#       hour == "EPOC_2hr" ~ "2",
+#       hour == "EPOC_3hr" ~ "3",
+#       hour == "EPOC_4hr" ~ "4",
+#       hour == "EPOC_5hr" ~ "5"
+#     )
+#   )
+
+# plot
+# ggplot() + 
+#   # geom_point(data = epoc_sum_new, aes(x = hour_labels, y = EPOC_avg, color = temp, shape = temp), size = 2) +
+#   geom_line(data = epoc_sum_new, aes(x = hour_labels, y = EPOC_avg, color = temp)) +
+#   scale_color_manual(values=c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
+#   labs(y = expression(atop("EPOC", paste("(",mg~O[2]~kg^-1,")"))),
+#        x = expression(paste("Temperature (", degree, "C)"))) +
+#   theme_classic() + 
+#   theme(axis.text = element_text(color = "black", size = 12),
+#         axis.title = element_text(size = 13),
+#         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
+#         plot.caption = element_text(size = 10, hjust = 0),
+#         legend.position = "none")
+
+```
+

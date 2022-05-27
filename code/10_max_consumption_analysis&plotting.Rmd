@@ -57,7 +57,7 @@ mc_summary <- read_csv(here::here("data", "foraging", "outputs", "max_consump_su
 ##############################
 
 foraging60 <- foraging_assays %>% 
-  filter(Initial == "60") %>% 
+  filter(Initial == "60")
 
 ##############################
 # fit lmer (3 levels (assays) per lobster, but need to account for lobster as random effect so still using this method)
