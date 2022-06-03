@@ -16,7 +16,7 @@ foraging_data <- read.csv(here::here("data", "foraging", "raw", "foraging_assay_
 ##############################
 
 # give each lobster a unique ID number
-foraging_data$id <- as.numeric(foraging_data$lobster_id)
+foraging_data$id <- as.numeric(as.factor(foraging_data$lobster_id))
 
 # add "t" in front of each temperature and coerce to factor
 foraging_data$temp2 <- as.factor(paste("t", foraging_data$temp, sep = ""))
@@ -132,7 +132,7 @@ tind <- as.factor(as.vector(tind$temp))
 # Test against simulated dataset.
 jags.data = list("initial"= s$initial,
                  "killed" = s$killed,
-                 "id" = s$id,
+                 "id" = as.factor(s$id),
                  "num.ind" = length(unique(s$id)),
                  "n" = length(s$initial), 
                  "t" = s$temp, 
@@ -145,9 +145,9 @@ jags.data = list("initial"= s$initial,
 ##############################
 
 n.chains = 3 # apparently pretty standard
-n.burnin = 250000 # how many estimates to throw out; # 250,000; 10,000
+n.burnin = 25000 # how many estimates to throw out; # 250,000; 10,000
 n.thin = 10 # only keep every other estimate; # 10; 2
-n.iter = 500000 # number of interations ; # 500,000; 25,000
+n.iter = 50000 # number of interations ; # 500,000; 25,000
 
 ##############################
 # run model 
@@ -156,6 +156,24 @@ n.iter = 500000 # number of interations ; # 500,000; 25,000
 model = R2jags::jags(jags.data, parameters.to.save=jags.params,inits=NULL,
                      model.file=model.loc, n.chains = n.chains, n.burnin=n.burnin,
                      n.thin=n.thin, n.iter=n.iter, DIC=TRUE)
+
+# Extract model output
+
+df.treat <- as.mcmc(model) %>%
+  recover_types(s) %>%
+  spread_draws(t.a[temp], t.h[temp])
+
+df.ind <- as.mcmc(model) %>%
+  recover_types(s) %>%
+  spread_draws(a[id], h[id])
+
+df.pop <- as.mcmc(model) %>%
+  recover_types(s) %>%
+  spread_draws(mu.a, mu.h)
+
+write.csv(df.pop, here::here("data/foraging/outputs/", "posteriors_population.csv"), row.names = F)
+write.csv(df.treat, here::here("data/foraging/outputs", "posteriors_treatments.csv"), row.names = F)
+write.csv(df.ind, here::here("data/foraging/outputs", "posteriors_individuals.csv"), row.names = F)
 
 ##############################
 # run model 
@@ -179,7 +197,7 @@ mu.h = MCMCsummary(model,params='mu.h')
 # lobster_ids
 ids <- sort(unique(foraging_data$lobster_id))
 # numeric factor levels associated with each lobster--I matched lobster ID with numeric idenitifier and then confirmed
-unique(as.numeric(s$id))
+unique(as.numeric(as.factor(s$id)))
 
 # temperature ids
 t.ids <- sort(unique(foraging_data$temp))

@@ -8,7 +8,33 @@ source(here::here("code", "00_libraries.R"))
 # load data
 ##############################
 
-metabolic_traits <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv"))
+
+boltzmann_constant <- 8.617333262 * 10^-5 #eV K-1
+
+metabolic_traits <- read_csv(here::here("data", "metabolism", "metabolic_traits.csv")) %>%
+  mutate(temp_c = temp, 
+         temp = NULL, 
+         temp_K = temp_c + 273.15, 
+         temp_A = (temp_K - 273.15)/(boltzmann_constant*temp_K*273.15))
+
+
+tc <- 0:40 # Gilooly et al. 2001, claim that mathematically speaking, if T0 = 273.15 then the relationship between biological rates (metabolism) and temperature, can be expressed in units of celcius (universal temperature dependence) over the biologically relevent range of 0- 40 degrees C. The following simulation code proves to me, at least, that the units of K and C are interchangable when you assume I = i0*e^((tk-t0)/k*tk*t0), where t0 = 273.15 across biologically relevant temperatures. 
+
+tk <- tc+273.15
+t0 <- 273.15
+ta <- (tk-t0) / (boltzmann_constant*tk*t0)
+ta_c <- tc/(boltzmann_constant*t0^2*(1+tc/t0)) # Following Gilooly et al. 2001, this is the equation based only on temperature in C.
+b0 <- 1
+ea <- 0.5
+b <- b0*exp(ea*(tk-t0)/(boltzmann_constant*tk*t0))
+bc<- b0*exp(ea*tc/(boltzmann_constant*t0^2*(1+tc/t0)))
+
+d <- par(mfrow = c(2,2))
+plot(log(b) ~ tc)  # linearly related, so we can exchange the scales
+plot(log(bc) ~ tc)
+plot(log(b) ~ ta)
+plot(log(bc) ~ ta_c)
+par(d)
 
 smr_sum <- read_csv(here::here("data", "metabolism", "outputs", "smr_summary_stats.csv"))
 mmr_sum <- read_csv(here::here("data", "metabolism", "outputs", "mmr_summary_stats.csv"))
@@ -29,14 +55,14 @@ ggplot(metabolic_traits, aes(x = BW, y = SMR))+
 # smr
 ##############################
 
-lm_smr <- lm(log(SMR) ~ temp, data = metabolic_traits)
+lm_smr <- lm(log(SMR) ~ I(temp_c/(boltzmann_constant*273.15^2*(1+temp_c/273.15))), data = metabolic_traits)
 summary(lm_smr)
 
-pred_smr <- as.data.frame(ggeffects::ggpredict(lm_smr, terms = "temp [11:26]"))
+pred_smr <- as.data.frame(ggeffects::ggpredict(lm_smr, terms = "temp_c [11:26 by=0.1]"))
 
 
 smr_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = temp, y = SMR), color = "black", width = 0.4, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = temp_c, y = SMR), color = "black", width = 0.4, alpha = 0.2, size = 3) +
   geom_line(data = pred_smr, aes(x = x, y = predicted), lwd = 1.2)+
   geom_ribbon(data = pred_smr, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.1)+
   geom_errorbar(data = smr_sum, aes(x = temp, ymin = SMR_avg - error, ymax = SMR_avg + error), width = 0.1, size = 1, color = "black") +
@@ -44,28 +70,27 @@ smr_plot <- ggplot() +
   geom_point(data = smr_sum, aes(x = temp,  y = SMR_avg, color = as.factor(temp)), size = 4.5) +
   labs(y = expression(atop("Standard Metabolic Rate", paste("(",mg~O[2]~kg^-1~min^-1,")"))),
        x = "Temperature (°C)") +
-  scale_y_continuous(breaks = seq(0, 1.6, by = 0.5)) +
+  scale_x_continuous(limits=c(10, 28),breaks=c(11,16,21,26))+
   scale_color_manual(values=c("lightslategray", "lightblue", "lightcoral", "indianred4")) +
   theme_classic() +
   theme(axis.text = element_text(color = "black", size = 12),
         axis.title = element_text(size = 13),
         panel.border = element_rect(colour = "black", fill = NA, size = 0.7),
         plot.caption = element_text(size = 10, hjust = 0),
-        legend.position = "none")+
-  scale_x_continuous(limits=c(10, 28),breaks=c(11,16,21,26))
+        legend.position = "none")
 
 
 ##############################
 # mmr panel
 ##############################
 
-lm_mmr <- lm(MMR ~ temp + I(temp^2), data = metabolic_traits)
+lm_mmr <- lm(MMR ~ temp_c + I(temp_c^2), data = metabolic_traits)
 summary(lm_mmr)
 
-pred_mmr <- as.data.frame(ggeffects::ggpredict(lm_mmr, terms = "temp [11:26]"))
+pred_mmr <- as.data.frame(ggeffects::ggpredict(lm_mmr, terms = "temp_c [11:26]"))
 
 mmr_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = temp, y = MMR), color = "black", width = 0.4, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = temp_c, y = MMR), color = "black", width = 0.4, alpha = 0.2, size = 3) +
   geom_line(data = pred_mmr, aes(x = x, y = predicted), lwd = 1.2)+
   geom_ribbon(data = pred_mmr, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.1)+
   geom_errorbar(data = mmr_sum, aes(x = temp, ymin = MMR_avg - error, ymax = MMR_avg + error), width = 0.1, size = 1, color = "black") +
@@ -88,13 +113,13 @@ mmr_plot <- ggplot() +
 # aas panel
 ##############################
 
-lm_aas <- lm(AAS ~ temp + I(temp^2), data = metabolic_traits)
+lm_aas <- lm(AAS ~ temp_c + I(temp_c^2), data = metabolic_traits)
 summary(lm_aas)
 
-pred_aas <- as.data.frame(ggeffects::ggpredict(lm_aas, terms = "temp [11:26]"))
+pred_aas <- as.data.frame(ggeffects::ggpredict(lm_aas, terms = "temp_c [11:26]"))
 
 aas_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = temp, y = AAS), color = "black", width = 0.4, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = temp_c, y = AAS), color = "black", width = 0.4, alpha = 0.2, size = 3) +
   geom_line(data = pred_aas, aes(x = x, y = predicted), lwd = 1.2)+
   geom_ribbon(data = pred_aas, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.1)+
   geom_errorbar(data = aas_sum, aes(x = temp, ymin = AS_avg - error, ymax = AS_avg + error), width = 0.1, size = 1, color = "black") +
@@ -117,13 +142,13 @@ aas_plot <- ggplot() +
 # fas panel
 ##############################
 
-lm_fas <- lm(FAS ~ temp, data = metabolic_traits)
+lm_fas <- lm(FAS ~ temp_c, data = metabolic_traits)
 summary(lm_fas)
 
-pred_fas <- as.data.frame(ggeffects::ggpredict(lm_fas, terms = "temp [11:26]"))
+pred_fas <- as.data.frame(ggeffects::ggpredict(lm_fas, terms = "temp_c [11:26]"))
 
 fas_plot <- ggplot() +
-  geom_jitter(data = metabolic_traits, aes(x = temp, y = FAS), color = "black", width = 0.4, alpha = 0.2, size = 3) +
+  geom_jitter(data = metabolic_traits, aes(x = temp_c, y = FAS), color = "black", width = 0.4, alpha = 0.2, size = 3) +
   geom_line(data = pred_fas, aes(x = x, y = predicted), lwd = 1.2)+
   geom_ribbon(data = pred_fas, aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high), alpha = 0.1)+
   geom_errorbar(data = fas_sum, aes(x = temp, ymin = FAS_avg - error, ymax = FAS_avg + error), width = 0.1, size = 1, color = "black") +

@@ -1,7 +1,15 @@
 Bart's To Do: 
 
-1. refit the metabolism X temperature models using celcius as a continuous following Erika's expectations listed in the paper
+______________________________________________________________________________________________________1. refit the metabolism X temperature models using celcius as a continuous following Erika's expectations listed in the paper
 
-2. refit the metabolism X temperature models using K... Look at Vassar and McCann 2005 to figure out the Rall et al. convertion thing. 
+2. ___________________________________________________________________________________________________refit the metabolism X temperature models using K... Look at Vassar and McCann 2005 to figure out the Rall et al. convertion thing. 
 
-3. extract the estimates for handling time for each temperature treatment, convert to max consumption rate, and fit the arrhenius equation
+3. __________________________________________________________________________________________________extract the estimates for handling time for each temperature treatment, convert to max consumption rate, and fit the arrhenius equation
+
+- ___________________________________________________________________________________________________Add mass correction to the metabolism X temperature models
+
+- ___________________________________________________________________________________________________mass correct the max C models...
+
+- fix functional response figure
+
+- rebuild maxC ~ temp figure where maxC is mass corrected to make it consistent
